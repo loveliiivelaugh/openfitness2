@@ -20,7 +20,6 @@ export function AuthProvider({ children }: any) {
     const supabaseStore = useSupabaseStore();
     const [userType, setUserType] = useState<"admin" | "guest" | null>("admin");
 
-
     async function handleSuccess(data: any) {
         localStorage.setItem("jwt", data.jwt);
 
