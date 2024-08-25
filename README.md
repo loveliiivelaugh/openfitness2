@@ -9,8 +9,6 @@
 A fitness + nutrition tracking and reporting application. Open source project. Progressive Web Application.
 
 - [Website](https://openfitness2.netlify.app)
-<!-- - Hide Backend -->
-<!-- - [Backend](https://openfitness2.onrender.com) -->
 - [Repository](https://github.com/loveliiivelaugh/openfitness2)
 - [Documentation](https://github.com/loveliiivelaugh/openfitness2)
 
