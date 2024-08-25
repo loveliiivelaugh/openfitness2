@@ -1,7 +1,7 @@
 import postgres from 'postgres'
 import { createClient } from '@supabase/supabase-js'
 import { drizzle } from 'drizzle-orm/postgres-js'
-import { schema } from '../db'
+import { schema } from '../database'
 
 
 const {
