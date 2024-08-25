@@ -14,9 +14,9 @@ A fitness + nutrition tracking and reporting application. Open source project. P
 
 ## Screenshots *concept*
 
-![Openfitness 2.0](/openfitness2/frontend/src/assets/openfitness_thumb_1.png)
+![Openfitness 2.0](/frontend/src/assets/openfitness_thumb_1.png)
 
-![Openfitness 2.0](/openfitness2/frontend/src/assets/openfitness_thumb_2.png)
+![Openfitness 2.0](/frontend/src/assets/openfitness_thumb_2.png)
 
 ## Technologies
 
