@@ -537,12 +537,12 @@ export const openfitnessScripts = {
     // ... for each table by date and for each chart type available in the app
     getAllTables: async (db: any) => {
         const queryOptions = {
-            // columns: {
-            //     created_at: false,
-            //     updated_at: false,
-            //     user_id: false,
-            //     // nutrients: false,
-            // },
+            columns: {
+                created_at: false,
+                updated_at: false,
+                user_id: false,
+                // nutrients: false,
+            },
         };
     
         const requestTables = [
@@ -573,9 +573,9 @@ export const openfitnessScripts = {
                     )
                 );
 
-            // if (!profileTable || !exerciseTable || !foodTable || !sleepTable || !stepsTable || !weightTable) {
-            //     return openfitnessScripts.exitGetAllTables("Missing table data");
-            // };
+            if (!profileTable || !exerciseTable || !foodTable || !sleepTable || !stepsTable || !weightTable) {
+                return openfitnessScripts.exitGetAllTables("Missing table data");
+            };
 
             const { groupDataByDate } = openfitnessScripts;
             const groupedExerciseData = groupDataByDate(exerciseTable, 'date');
