@@ -1,11 +1,7 @@
-To install dependencies:
-```sh
-bun install
-```
+# Openfitness 2.0 Backend
 
-To run:
-```sh
-bun run dev
-```
+## Docs
 
-open http://localhost:3000
+- `/api/v1/openfitness/fitness_tables` - Open fitness API
+- `/api/v1/database/schema` - Open fitness API
+- `/api/v1/database/:table` - Open fitness API
