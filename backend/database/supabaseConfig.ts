@@ -1,18 +1,18 @@
 import postgres from 'postgres'
-import { createClient } from '@supabase/supabase-js'
+// import { createClient } from '@supabase/supabase-js'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import * as schema from './schemas'
 
 
-const {
-    SUPABASE_URL: supabaseUrl,
-    SUPABASE_PUBLIC_KEY: supabaseAnonKey,
-} = Bun.env;
+// const {
+//     SUPABASE_URL: supabaseUrl,
+//     SUPABASE_PUBLIC_KEY: supabaseAnonKey,
+// } = Bun.env;
 
-const supabase = createClient(supabaseUrl as string, supabaseAnonKey as string);
+// const supabase = createClient(supabaseUrl as string, supabaseAnonKey as string);
 
 
-const connectionString = process.env.SUPABASE_CONNECTION_STRING as string
+const connectionString = (Bun.env.SUPABASE_CONNECTION_STRING as string);
 
 function initDatabase() {
     try {
@@ -33,4 +33,4 @@ function initDatabase() {
 };
 
 
-export { initDatabase, supabase };
+export { initDatabase } //, supabase };
