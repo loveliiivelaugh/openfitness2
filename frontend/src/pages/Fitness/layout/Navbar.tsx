@@ -6,7 +6,6 @@ import {
 import HomeIcon from '@mui/icons-material/Home';
 
 import { paths } from '../api';
-import { handleSignOut } from '../../../Auth/Auth3';
 import { useSupabaseStore } from '../../../store';
 
 
@@ -23,7 +22,7 @@ export const Navbar = () => {
 
     const handleCloseUserMenu = async (setting: SettingType) => {
         if (setting === 'Logout') {
-            const result = await handleSignOut();
+            const result = true;
             if (result) supabaseStore.setSession(null);
         };
 
