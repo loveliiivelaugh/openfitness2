@@ -1,7 +1,7 @@
 FROM oven/bun:latest
 
 # Set working directory
-WORKDIR /app
+WORKDIR /backend
 
 # Copy package.json and yarn.lock/npm package.json to the container
 COPY ./backend/package.json .
@@ -13,7 +13,7 @@ RUN bun install
 COPY . .
 
 # Command to run the application
-CMD ["cd", "backend", "&&", "bun", "run", "src/index.ts"]
+CMD ["bun", "run", "src/index.ts"]
 
 # Expose port (if your application listens on a different port, update it here)
 EXPOSE 5001
