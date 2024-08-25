@@ -32,7 +32,7 @@ export const Navbar = () => {
     return (
         <AppBar>
             <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-                <IconButton component="a" href={paths.appDepot}>
+                <IconButton color="inherit">
                     <HomeIcon />
                 </IconButton>
                 <Typography variant="h6">OpenFitness</Typography> 
