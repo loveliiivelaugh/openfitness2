@@ -554,7 +554,18 @@ export const openfitnessScripts = {
             'weight',
         ];
     
+        console.log("openfitness.scripts.getAllTables: ", db);
         try {
+            const tablesResults = await Promise
+                .all(requestTables
+                    .map(async (table: string) => await db
+                        .query
+                        ?.[table]
+                        .findMany(queryOptions)
+                        // .where(eq(table.date, new Date()))
+                    )
+                );
+
             const [
                 // Assign tables data to variables
                 profileTable,
@@ -563,16 +574,9 @@ export const openfitnessScripts = {
                 sleepTable,
                 stepsTable,
                 weightTable,
-            ] = await Promise
-                .all(requestTables
-                    .map(async table => await db
-                        .query
-                        ?.[table]
-                        .findMany(queryOptions)
-                        // .where(eq(table.date, new Date()))
-                    )
-                );
+            ] = tablesResults;
 
+            console.log("openfitness.scripts.getAllTables.results: ", profileTable, exerciseTable, foodTable, sleepTable, stepsTable, weightTable);
             if (!profileTable || !exerciseTable || !foodTable || !sleepTable || !stepsTable || !weightTable) {
                 return openfitnessScripts.exitGetAllTables("Missing table data");
             };
