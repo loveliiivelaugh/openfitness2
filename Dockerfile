@@ -10,7 +10,7 @@ COPY ./backend/package.json .
 RUN bun install
 
 # Copy the rest of the application code to the container
-COPY . .
+COPY ./backend .
 
 # Command to run the application
 CMD ["bun", "run", "src/index.ts"]
