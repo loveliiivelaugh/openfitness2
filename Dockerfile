@@ -13,7 +13,7 @@ RUN npm install
 COPY . .
 
 # Command to run the application
-CMD ["node", "/index.ts"]
+CMD ["node", "index.ts"]
 
 # Expose port (if your application listens on a different port, update it here)
 EXPOSE 3001
