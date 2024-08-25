@@ -2,9 +2,17 @@
 
 [![Open Source](https://img.shields.io/badge/Open%20Source-Open%20Source-green.svg)](https://github.com/loveliiivelaugh/openfitness2)
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f93197d0-094d-4309-9f87-938327c0b0d3/deploy-status)](https://app.netlify.com/sites/openfitness2/deploys)
+
 ## About
 
 A fitness + nutrition tracking and reporting application. Open source project. Progressive Web Application.
+
+- [Website](https://openfitness2.netlify.app)
+<!-- - Hide Backend -->
+<!-- - [Backend](https://openfitness2.onrender.com) -->
+- [Repository](https://github.com/loveliiivelaugh/openfitness2)
+- [Documentation](https://github.com/loveliiivelaugh/openfitness2)
 
 ## Features
 

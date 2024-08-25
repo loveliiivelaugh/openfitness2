@@ -1,16 +1,14 @@
-FROM node:18-alpine
+FROM oven/bun:latest
 
 # Set working directory
-WORKDIR /app
-# ENV PATH=/usr/local/openfitness/node_modules/.bin:$PATH
-# WORKDIR /usr/local/apps/openfitness
+WORKDIR /frontend
 
 EXPOSE 3001
 
-COPY package.json ./
+COPY ./frontend/package.json .
 
-RUN npm install --silent
+RUN bun install
 
-COPY . ./
+COPY ./frontend .
 
-CMD ["npm", "run", "dev"]
+CMD ["bun", "run", "dev"]
