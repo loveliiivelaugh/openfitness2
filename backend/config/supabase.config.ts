@@ -1,7 +1,7 @@
 import postgres from 'postgres'
 // import { createClient } from '@supabase/supabase-js'
 import { drizzle } from 'drizzle-orm/postgres-js'
-import * as schema from './schemas'
+import * as schema from '../database/schemas'
 
 
 // const {
@@ -13,6 +13,7 @@ import * as schema from './schemas'
 
 
 const connectionString = (Bun.env.SUPABASE_CONNECTION_STRING as string);
+// const connectionString = (Bun.env.RENDER_POSTGRES_CONNECTION_STRING as string);
 
 function initDatabase() {
     try {
@@ -33,4 +34,4 @@ function initDatabase() {
 };
 
 
-export { initDatabase } //, supabase };
+export { initDatabase, schema } //, supabase };

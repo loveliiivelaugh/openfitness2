@@ -13,6 +13,7 @@ const basicAuthConfig = <BasicAuthConfig>{
 };
 
 const trustedSources: string[] = [
+    "https://openfitness2.netlify.app",
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',

@@ -8,7 +8,8 @@ import { secureHeaders } from 'hono/secure-headers'
 import { showRoutes } from 'hono/dev'
 // Utilities
 import { createDatabaseMiddleware } from '../database';
-import { initDatabase } from '../database/supabaseConfig';
+import { initDatabase } from '../config/supabase.config';
+import { corsConfig } from '../config/clients.config';
 import { routes } from './routes';
 
 
@@ -20,9 +21,7 @@ const app = new Hono();
 // Middleware
 app.use(logger());
 app.use(poweredBy());
-app.use(cors({
-  origin: '*', // TODO: Change to production
-}));
+app.use(cors(corsConfig));
 app.use(prettyJSON({ space: 4 }));
 app.use(secureHeaders());
 
