@@ -14,7 +14,7 @@ import { routes } from './routes';
 
 
 // Server
-const port = process.env.PORT || 5001;
+const port = Bun.env.PORT || 5081;
 
 const app = new Hono();
 
