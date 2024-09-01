@@ -65,18 +65,18 @@ interface SupabaseSession {
 
 interface SupabaseStore {
   session: SupabaseSession | null;
+  userType: "admin" | "guest" | null;
+  setUserType: (userType: "admin" | "guest" | null) => void;
   setSession: (session: SupabaseSession | null) => void;
-  cpxData: any; // Cross Platform Exchange Data
-  setCpxData: (cpxData: any) => void;
 }
 
 const useSupabaseStore = create<SupabaseStore>((set) => ({
   // states
   session: null,
-  cpxData: null,
+  userType: null,
   // actions
   setSession: (session: any) => set({ session }),
-  setCpxData: (cpxData: any) => set({ cpxData }),
+  setUserType: (userType: any) => set({ userType }),
 }));
 
 

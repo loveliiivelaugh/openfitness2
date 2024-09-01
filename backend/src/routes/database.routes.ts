@@ -52,19 +52,20 @@ databaseRoutes
 
 /**
  * @swagger
- * /database/read_db:
+ * /database/read_database:
  *   get:
  *     summary: Returns stuff
  *     responses:
  */
-    .get('/', async (c: Context) => {
-        const table = c.req.query('table') || 'table_name';
-        const { db } = c.var;
+    .get('/:table', async (c: Context) => {
+        // const table = c.req.query('table') || 'table_name';
+        const table = c.req.param('table') || 'table_name';
+        const { database } = c.var;
 
         const options = {};
         
         try {
-            const data = await db
+            const data = await database
                 .query
                 ?.[table]
                 .findMany(options);
@@ -85,7 +86,7 @@ databaseRoutes
  *     summary: Add stuff
  *     responses:
  */
-    .post('/', validator('json', (value: any, c: Context) => {
+    .post('/:table', validator('json', (value: any, c: Context) => {
         // // Validations on the server side for POST requests
         // const table = c.req.query('table');
         // const decodedJwt = c.get('jwtPayload');
@@ -111,13 +112,14 @@ databaseRoutes
     }),
     // Route definition
     async (c: Context) => {
-        const { db } = c.var;
-        const table = c.req.query('table');
+        const { database } = c.var;
+        // const table = c.req.query('table');
+        const table = c.req.param('table');
         const tableSchema = schema[table as keyof typeof schema];
         const validatedData = c.req.valid("json" as "json");
 
         try {
-            const data = await db
+            const data = await database
                 .insert(tableSchema)
                 .values(validatedData)
                 .returning();
@@ -138,7 +140,7 @@ databaseRoutes
  *     summary: Add stuff
  *     responses:
  */
-    .put('/', validator('json', (value: any, c: Context) => {
+    .put('/:table', validator('json', (value: any, c: Context) => {
         // // Validations on the server side for POST requests
         // const table = c.req.query('table');
 
@@ -161,13 +163,14 @@ databaseRoutes
     }),
     // Route definition
     async (c: Context) => {
-        const { db } = c.var;
-        const table = c.req.query('table');
+        const { database } = c.var;
+        // const table = c.req.query('table');
+        const table = c.req.param('table');
         const tableSchema = schema[table as keyof typeof schema];
         const validatedData = c.req.valid("json" as "json");
 
         try {
-            const data = await db
+            const data = await database
                 .update(tableSchema)
                 .set(validatedData)
                 .returning();

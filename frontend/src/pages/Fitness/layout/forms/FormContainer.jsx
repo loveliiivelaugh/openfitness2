@@ -17,7 +17,7 @@ import { fitnessQueries } from '../../api';
 
 const mapDefaultValue = (column, store) => {
     const profile = store.fitnessTables?.profile[0];
-    // console.log("mapDefaultValue: ", column, profile);
+    console.log("mapDefaultValue: ", column, profile, store);
 
     switch (column.name) {
         // Profile Default Values
@@ -209,7 +209,7 @@ const FormContainer = ({ schema, handleRefreshQueries }) => {
     const mutateDbQuery = useMutation(fitnessQueries.writeTableQuery());
     const updateDbQuery = useMutation(fitnessQueries.updateTableQuery());
 
-    // console.log({ fitnessStore });
+    console.log({ fitnessStore, supabaseStore });
 
     const fieldsArray = schema.columns
         .filter(column => !excludedColumns.includes(column.name))

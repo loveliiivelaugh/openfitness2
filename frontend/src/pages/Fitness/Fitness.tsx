@@ -102,7 +102,7 @@ const Fitness = () => {
         "pending": <div>Loading...</div>,
         "loading": <div>Tables are getting ready...</div>,
         "success": (
-            <Grid container my={6} sx={{ maxWidth: "100vw" }}>
+            <Grid container my={10} p={4} sx={{ maxWidth: "100vw" }}>
 
                 <Navbar />
 
