@@ -4,7 +4,7 @@ import { Box, Button, styled } from '@mui/material';
 import AuthForm from './AuthForm';
 import { useFitnessStore, useSupabaseStore } from '../../store';
 import { supabase } from '../../config/auth.config';
-import RegistrationView from '../../pages/Registration/RegistrationView';
+// import RegistrationView from '../../pages/Registration/RegistrationView';
 
 
 const Styled = {

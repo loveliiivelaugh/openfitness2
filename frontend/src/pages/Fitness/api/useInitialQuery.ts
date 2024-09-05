@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { useFitnessStore } from '../../../store';
-import { paths, queries } from '.';
 import { openfitnessScripts } from '../../../scripts';
+import { paths, queries } from '.';
 
 const topics: any[] = ["Weight", "Food", "Exercise", "Profile", "Sleep", "Steps"];
 
@@ -13,7 +13,7 @@ const useInitialQuery = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
 
-    const schemaQuery = useQuery(queries.query(paths.database + "/schema"))
+    const schemaQuery = useQuery(queries.query(paths.database + "/schema"));
     const directQueries = useQueries({ 
         queries: [...topics].map((topic: string) => queries.queryDirect({ table: topic.toLowerCase() }))
     });
@@ -31,10 +31,14 @@ const useInitialQuery = () => {
                 setStatus("success");
                 setIsLoading(false);
             })();
-        } else setStatus("error");
+        } else {
+            setStatus("error");
+            setIsLoading(false);
+            setIsError(true);
+        };
     }, [isSuccess]);
 
-    return {data, isLoading, isError, status, reload};
-}
+    return { data, isLoading, isError, status, reload };
+};
 
-export default useInitialQuery
+export default useInitialQuery;
