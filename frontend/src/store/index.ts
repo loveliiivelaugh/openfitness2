@@ -11,6 +11,8 @@ interface FitnessStoreState {
   fitnessTables: Record<string, any>; // Define a more specific type if available
   activeSearchTab: 'recent' | 'favorites' | 'search'
   appConfig: any;
+  registrationView: boolean;
+  setRegistrationView: (registrationView: boolean) => void;
   setAppConfig: (appConfig: any) => void;
   setFitnessTables: (fitnessTables: Record<string, any>) => void;
   toggleDrawer: (options?: { open?: boolean; anchor?: 'left' | 'right' | 'bottom'  } | boolean | null) => void;
@@ -29,6 +31,9 @@ const useFitnessStore = create<FitnessStoreState>((set) => ({
   activeSearchTab: "recent",
   fitnessTables: {},
 
+  registrationView: false,
+  setRegistrationView: (registrationView) => set(() => ({ registrationView })),
+
   appConfig: null,
   setAppConfig: (appConfig) => set(() => ({ appConfig })),
   
@@ -43,6 +48,25 @@ const useFitnessStore = create<FitnessStoreState>((set) => ({
   setActiveSearchTab: (activeSearchTab) => set(() => ({ activeSearchTab }))
 }));
 
+interface UtilityStoreType {
+  alert: {
+    severity: "success" | "error" | "warning" | "info";
+    message: string;
+    open: boolean;
+  };
+  setAlert: (alert: UtilityStoreType["alert"]) => void;
+  createAlert: (severity: string, message: string) => void;
+}
+
+const useUtilityStore = create<UtilityStoreType>((set) => ({
+  alert: {
+    severity: "success",
+    message: "",
+    open: false
+  },
+  setAlert: (alert) => set((old) => ({ ...old, alert })),
+  createAlert: (severity: string, message: string) => set(() => ({ alert: { severity, message, open: true } }) as UtilityStoreType),
+}));
 
 // *** SUPABASE STORE ***
 
@@ -80,4 +104,4 @@ const useSupabaseStore = create<SupabaseStore>((set) => ({
 }));
 
 
-export { useSupabaseStore, useFitnessStore };
+export { useSupabaseStore, useFitnessStore, useUtilityStore };

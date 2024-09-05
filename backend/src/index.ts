@@ -9,7 +9,7 @@ import { showRoutes } from 'hono/dev'
 // Utilities
 import { createDatabaseMiddleware } from '../database';
 import { initDatabase } from '../config/supabase.config';
-import { corsConfig } from '../config/clients.config';
+import { corsConfig, initApiClients } from '../config/clients.config';
 import { routes } from './routes';
 
 
@@ -27,6 +27,9 @@ app.use(secureHeaders());
 
 // Database (For Production: Supabase *for now*)
 app.use(createDatabaseMiddleware(initDatabase()));
+
+// Set up + authenticate External API Clients
+app.use(initApiClients());
 
 // Routes
 app.route('/', routes);

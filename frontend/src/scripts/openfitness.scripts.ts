@@ -1,6 +1,46 @@
-import * as schema from "../../database/schemas";
+// import * as schema from "../../database/schemas";
 
 export const openfitnessScripts = {
+    calculate: {
+        // Basal Metabolic Rate
+        bmr: (params: any) => {
+            const kg = (params.weight * 0.4535924);
+            const bmr = (20 * kg);
+            return bmr
+        },
+        // Thermic Effect of Eating
+        tef: (params: any) => {
+            return (params.bmr * 0.1);
+        },
+        // Exercise Energy Expenditure
+        eee: (params: { activity: string }) => {
+            return ({
+                'sedentary': 0,
+                'lightly': 250,
+                'moderate': 325,
+                'vigorous': 425,
+                'extreme': 500
+            }[params.activity] || 250);
+        },
+        // Non-Exercise Activity Thermogenesis
+        neat: (params: { activity: string }) => {
+            return ({
+                'sedentary': 0,
+                'lightly': 250,
+                'moderate': 325,
+                'vigorous': 425,
+                'extreme': 500
+            }[params.activity] || 250);
+        },
+        // Total Daily Energy Expenditure
+        tdee: (params: any) => {
+            const bmr = openfitnessScripts.calculate.bmr({ weight: params.weight });
+            const tef = openfitnessScripts.calculate.tef({ bmr });
+            const eee = openfitnessScripts.calculate.eee(params) as number;
+            const neat = openfitnessScripts.calculate.neat(params) as number;
+            return (bmr + tef + eee + neat);
+        }
+    },
 
     // Description: group data by date
     groupDataByDate: (data: Array<any>, dateKey: string) => data
@@ -59,6 +99,7 @@ export const openfitnessScripts = {
 
     extractMacros: (nutrients: any, macroType: "fat" | "carbs" | "protein") => {
 
+        console.log("extractMacros: ", nutrients, macroType)
         if (!nutrients[macroType]) return 0
         if (nutrients[macroType] === null) return 0
 
@@ -133,7 +174,8 @@ export const openfitnessScripts = {
             sleepTable,
             stepsTable,
             weightTable,
-            foodDataDeduction
+            foodDataDeduction,
+            schema
         } = props;
 
         const today = new Date();
@@ -145,20 +187,21 @@ export const openfitnessScripts = {
             xAxis[0].data.push(date.getDate() as never);
         }
 
+        console.log("getChartsData.foodDataDeduction: ", profileTable, foodDataDeduction);
         const chartsData = {
             profile: {
                 table: {
                     title: "Health Profile",
-                    columns: Object
-                        .keys(profileTable[0])
-                        .map((key) => ({ 
-                            field: key, 
-                            headerName: key, 
+                    columns: schema.find(({ table }: { table: string }) => (table === "profile"))?.columns
+                        .map(({ name, notNull }: { name: string, notNull: boolean }) => ({ 
+                            field: name, 
+                            headerName: name, 
                             width: 150,
-                            ...["goal", "exercise"]
-                                .includes(key) && { 
-                                    valueGetter: (input: any) => input + ":custom-render"
-                                }
+                            required: notNull
+                            // ...["goal", "exercise"]
+                            //     .includes(key) && { 
+                            //         valueGetter: (input: any) => input + ":custom-render"
+                            //     }
                         })),
                     rows: profileTable
                 }
@@ -170,7 +213,7 @@ export const openfitnessScripts = {
                     data: ['fat', 'carbs', 'protein']
                         .map((type, index) => ({
                             id: index,
-                            value: foodDataDeduction[`total_${type}`],
+                            value: foodDataDeduction?.[`total_${type}`] || 0,
                             label: type
                         }))
                 },
@@ -179,31 +222,31 @@ export const openfitnessScripts = {
                     filters: ["Today", "Yesterday", "Last Week", "Last 30 Days", "All Time"],
                     series: [
                         {
-                            data: [
-                                foodDataDeduction.total_fat || (5000 * 0.2),
-                                foodDataDeduction.total_carbs || (5000 * 0.45),
-                                foodDataDeduction.total_protein || (5000 * 0.35)
+                            data: [] || [
+                                foodDataDeduction?.total_fat || 0, // || (5000 * 0.2),
+                                foodDataDeduction?.total_carbs || 0, // || (5000 * 0.45),
+                                foodDataDeduction?.total_protein || 0, // || (5000 * 0.35)
                             ]
                         },
                         {
-                            data: [
-                                foodDataDeduction.total_fat || (5000 * 0.2),
-                                foodDataDeduction.total_carbs || (5000 * 0.45),
-                                foodDataDeduction.total_protein || (5000 * 0.35)
+                            data: [] || [
+                                foodDataDeduction?.total_fat || 0, // || (5000 * 0.2),
+                                foodDataDeduction?.total_carbs || 0, // || (5000 * 0.45),
+                                foodDataDeduction?.total_protein || 0, // || (5000 * 0.35)
                             ]
                         },
                         {
-                            data: [
-                                foodDataDeduction.total_fat || (5000 * 0.2),
-                                foodDataDeduction.total_carbs || (5000 * 0.45),
-                                foodDataDeduction.total_protein || (5000 * 0.35)
+                            data: [] || [
+                                foodDataDeduction?.total_fat || 0, // || (5000 * 0.2),
+                                foodDataDeduction?.total_carbs || 0, // || (5000 * 0.45),
+                                foodDataDeduction?.total_protein || 0, // || (5000 * 0.35)
                             ]
                         },
                         {
-                            data: [
-                                foodDataDeduction.total_fat || (5000 * 0.2),
-                                foodDataDeduction.total_carbs || (5000 * 0.45),
-                                foodDataDeduction.total_protein || (5000 * 0.35)
+                            data: [] || [
+                                foodDataDeduction?.total_fat || 0, // || (5000 * 0.2),
+                                foodDataDeduction?.total_carbs || 0, // || (5000 * 0.45),
+                                foodDataDeduction?.total_protein || 0, // || (5000 * 0.35)
                             ]
                         },
                     ],
@@ -219,24 +262,24 @@ export const openfitnessScripts = {
                     xAxis: xAxis,
                     series: [
                         {
-                            data: [550, 650, 200, 400, 450, 340, 300]
+                            data: [] || [550, 650, 200, 400, 450, 340, 300]
                         },
                         {
-                            data: [1200, 1000, 1100, 1200, 1200, 1000, 1200]
+                            data: [] || [1200, 1000, 1100, 1200, 1200, 1000, 1200]
                         },
                         {
-                            data: [450, 700, 300, 400, 450, 350, 450]
+                            data: [] || [450, 700, 300, 400, 450, 350, 450]
                         },
                     ]
                 },
                 table: {
                     title: "Total Food Logged",
-                    columns: Object
-                        .keys(schema.food)
-                        .map((key) => ({ 
-                            field: key, 
-                            headerName: key, 
-                            width: 150 
+                    columns: schema.find(({ table }: { table: string }) => (table === "food"))?.columns
+                        .map(({ name, notNull }: { name: string, notNull: boolean }) => ({ 
+                            field: name, 
+                            headerName: name, 
+                            width: 150,
+                            required: notNull
                         })),
                     rows: foodTable
                 }
@@ -265,7 +308,7 @@ export const openfitnessScripts = {
                     title: "Today's Calories Burned by Muscle Group",
                     series: [
                         {
-                            data: [
+                            data: [] || [
                                 50, 100, 200, 30, 20, 50, 50
                             ]
                         }
@@ -290,36 +333,36 @@ export const openfitnessScripts = {
                     xAxis: xAxis,
                     series: [
                         {
-                            data: [100, 0, 120, 15, 80, 0, 0]
+                            data: [] || [100, 0, 120, 15, 80, 0, 0]
                         },
                         {
-                            data: [20, 230, 10, 0, 100, 0, 0]
+                            data: [] || [20, 230, 10, 0, 100, 0, 0]
                         },
                         {
-                            data: [240, 230, 180, 300, 200, 170, 100]
+                            data: [] || [240, 230, 180, 300, 200, 170, 100]
                         },
                         {
-                            data: [15, 10, 0, 130, 0, 10, 0]
+                            data: [] || [15, 10, 0, 130, 0, 10, 0]
                         },
                         {
-                            data: [20, 100, 10, 100, 10, 0, 0]
+                            data: [] || [20, 100, 10, 100, 10, 0, 0]
                         },
                         {
-                            data: [100, 10, 80, 20, 80, 20, 10]
+                            data: [] || [100, 10, 80, 20, 80, 20, 10]
                         },
                         {
-                            data: [40, 40, 40, 40, 40, 40, 40]
+                            data: [] || [40, 40, 40, 40, 40, 40, 40]
                         },
                     ]
                 },
                 table: {
                     title: "Total Exercises Logged",
-                    columns: Object
-                        .keys(schema.exercise)
-                        .map((key) => ({ 
-                            field: key, 
-                            headerName: key, 
-                            width: 150 
+                    columns: schema.find(({ table }: { table: string }) => (table === "exercise"))?.columns
+                        .map(({ name, notNull }: { name: string, notNull: boolean }) => ({ 
+                            field: name, 
+                            headerName: name, 
+                            width: 150,
+                            required: notNull
                         })),
                     rows: exerciseTable
                 }
@@ -345,7 +388,7 @@ export const openfitnessScripts = {
                     title: "Today's Steps by Time of Day",
                     series: [
                         {
-                            data: [
+                            data: [] || [
                                 300, 1400, 500
                             ]
                         }
@@ -362,24 +405,24 @@ export const openfitnessScripts = {
                     xAxis: xAxis,
                     series: [
                         {
-                            data: [200, 300, 100, 250, 300, 200, 200]
+                            data: [] || [200, 300, 100, 250, 300, 200, 200]
                         },
                         {
-                            data: [500, 400, 300, 200, 300, 400, 300]
+                            data: [] || [500, 400, 300, 200, 300, 400, 300]
                         },
                         {
-                            data: [300, 200, 340, 230, 100, 300, 230]
+                            data: [] || [300, 200, 340, 230, 100, 300, 230]
                         },
                     ]
                 },
                 table: {
                     title: "Total Steps Logged",
-                    columns: Object
-                        .keys(schema.steps)
-                        .map((key) => ({ 
-                            field: key, 
-                            headerName: key, 
-                            width: 150 
+                    columns: schema.find(({ table }: { table: string }) => (table === "steps"))?.columns
+                        .map(({ name, notNull }: { name: string, notNull: boolean }) => ({ 
+                            field: name, 
+                            headerName: name, 
+                            width: 150,
+                            required: notNull
                         })),
                     rows: stepsTable
                 }
@@ -406,7 +449,7 @@ export const openfitnessScripts = {
                     title: "Today's Sleep by Sleep Type",
                     series: [
                         {
-                            data: [
+                            data: [] || [
                                 100, 70, 20, 10
                             ]
                         }
@@ -428,27 +471,27 @@ export const openfitnessScripts = {
                     xAxis: xAxis,
                     series: [
                         {
-                            data: [ 0, 0, 0, 0, 0, 0, 0 ]
+                            data: [] || [ 0, 0, 0, 0, 0, 0, 0 ]
                         },
                         {
-                            data: [ 6, 4, 3, 4, 3, 2.6, 4 ]
+                            data: [] || [ 6, 4, 3, 4, 3, 2.6, 4 ]
                         },
                         {
-                            data: [ 1, 2, 3, 2, 3, 3, 1 ]
+                            data: [] || [ 1, 2, 3, 2, 3, 3, 1 ]
                         },
                         {
-                            data: [ 0, 1, 0, 1, 0, 0, 2 ]
+                            data: [] || [ 0, 1, 0, 1, 0, 0, 2 ]
                         },
                     ]
                 },
                 table: {
                     title: "Total Sleep Logged",
-                    columns: Object
-                        .keys(schema.sleep)
-                        .map((key) => ({ 
-                            field: key, 
-                            headerName: key, 
-                            width: 150 
+                    columns: schema.find(({ table }: { table: string }) => (table === "sleep"))?.columns
+                        .map(({ name, notNull }: { name: string, notNull: boolean }) => ({ 
+                            field: name, 
+                            headerName: name, 
+                            width: 150,
+                            required: notNull
                         })),
                     rows: sleepTable
                 }
@@ -457,12 +500,12 @@ export const openfitnessScripts = {
             weight: {
                 table: {
                     title: "Total Weight Logged",
-                    columns: Object
-                        .keys(schema.weight)
-                        .map((key) => ({ 
-                            field: key, 
-                            headerName: key, 
-                            width: 150 
+                    columns: schema.find(({ table }: { table: string }) => (table === "weight"))?.columns
+                        .map(({ name, notNull }: { name: string, notNull: boolean }) => ({ 
+                            field: name, 
+                            headerName: name, 
+                            width: 150,
+                            required: notNull
                         })),
                     rows: weightTable
                 },
@@ -470,7 +513,7 @@ export const openfitnessScripts = {
                     title: "Today's Weight",
                     series: [
                         {
-                            data: [
+                            data: [] || [
                                 215, 205
                             ]
                         }
@@ -485,7 +528,7 @@ export const openfitnessScripts = {
                 line: {
                     title: "Daily Weight (Last 7 Days)",
                     xAxis: xAxis,
-                    series: [
+                    series: [] || [
                         {
                             data: [ 215, 212, 216, 215, 212, 208, 210 ]
                         }
@@ -535,51 +578,22 @@ export const openfitnessScripts = {
 
     // Description: get all tables for OpenFitness app and format data ...
     // ... for each table by date and for each chart type available in the app
-    getAllTables: async (db: any) => {
-        const queryOptions = {
-            columns: {
-                created_at: false,
-                updated_at: false,
-                user_id: false,
-                // nutrients: false,
-            },
-        };
+    getAllTables: async (props: any) => {
     
-        const requestTables = [
-            'profile',
-            'exercise',
-            'food',
-            'sleep',
-            'steps',
-            'weight',
-        ];
-    
-        // console.log("openfitness.scripts.getAllTables: ", db);
+        console.log("openfitness.scripts.getAllTables: ", props);
         try {
-            const tablesResults = await Promise
-                .all(requestTables
-                    .map(async (table: string) => await db
-                        .query
-                        ?.[table]
-                        .findMany(queryOptions)
-                        // .where(eq(table.date, new Date()))
-                    )
-                );
-
+            // const topics: any[] = ["Weight", "Food", "Exercise", "Profile", "Sleep", "Steps"];
             const [
                 // Assign tables data to variables
-                profileTable,
-                exerciseTable,
+                weightTable,
                 foodTable,
+                exerciseTable,
+                profileTable,
                 sleepTable,
                 stepsTable,
-                weightTable,
-            ] = tablesResults;
+            ] = props.tablesResults;
 
-            console.log("openfitness.scripts.getAllTables.results: ", profileTable, exerciseTable, foodTable, sleepTable, stepsTable, weightTable);
-            if (!profileTable || !exerciseTable || !foodTable || !sleepTable || !stepsTable || !weightTable) {
-                return openfitnessScripts.exitGetAllTables("Missing table data");
-            };
+            console.log("openfitness.scripts.getAllTables.results: ", props);
 
             const { groupDataByDate } = openfitnessScripts;
             const groupedExerciseData = groupDataByDate(exerciseTable, 'date');
@@ -610,7 +624,9 @@ export const openfitnessScripts = {
                 sleepTable,
                 stepsTable,
                 weightTable,
-                foodDataDeduction
+                foodDataDeduction,
+                schema: props.schemas
+
             });
 
 
@@ -623,9 +639,9 @@ export const openfitnessScripts = {
                 ...exerciseDataDeduction,
                 total_calories_remaining: (
                     // Total Daily Energy Expenditure (TDEE) *Minimum Daily Calories Required*
-                    profileTable[0].tdee 
+                    profileTable.tdee 
                     // Algorithmic Adjustment to TDEE based on weight goal
-                    + profileTable[0].goal
+                    + profileTable.goal
                     // Add total active calories to daily calories burned
                     + total_active_calories
                     // Minus the amount of daily calories consumed 
@@ -658,7 +674,7 @@ export const openfitnessScripts = {
                 {
                     label: "Calories Remaining",
                     key: "total_calories_remaining",
-                    value: dataExtract.total_calories_remaining || 5200
+                    value: dataExtract.total_calories_remaining || 0
                 },
             ];
 

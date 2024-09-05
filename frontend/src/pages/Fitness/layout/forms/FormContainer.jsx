@@ -11,13 +11,16 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import moment from 'moment';
 
 import { BasicDatePicker, BasicTimePicker } from './BasicDatePicker';
-import { useFitnessStore, useSupabaseStore } from '../../../../store';
+import { useFitnessStore, useSupabaseStore, useUtilityStore } from '../../../../store';
 import { fitnessQueries } from '../../api';
+import { supabase } from '../../../../config/auth.config';
+import { openfitnessScripts } from '../../../../scripts';
 
 
 const mapDefaultValue = (column, store) => {
-    const profile = store.fitnessTables?.profile[0];
-    console.log("mapDefaultValue: ", column, profile, store);
+    const profile = store.fitnessTables?.profile?.[0];
+
+    console.log("mapDefaultValue: ", column, store, profile);
 
     switch (column.name) {
         // Profile Default Values
@@ -202,7 +205,8 @@ const excludedColumns = [
     "nutrients"
 ];
 
-const FormContainer = ({ schema, handleRefreshQueries }) => {
+const FormContainer = ({ schema, handleRefreshQueries, ...props }) => {
+    const utilityStore = useUtilityStore(); // utility states
     const supabaseStore = useSupabaseStore(); // auth states
     const fitnessStore = useFitnessStore(); // app states
     const fieldsQuery = useQuery(fitnessQueries.readTableQuery(schema));
@@ -224,48 +228,56 @@ const FormContainer = ({ schema, handleRefreshQueries }) => {
         }));
 
     const onSubmit = async (values) => {
-        // console.log("values: ", values)
-
-        const findHighestId = () => {
-            let highestId = 0;
-
-            fitnessStore.fitnessTables[schema.table]
-                .forEach((row) => {
-                    if (row.id > highestId) {
-                        highestId = row.id;
-                    }
-                });
-
-            return highestId;
-        };
-
+        
         delete values.value.created_at;
+        delete values.value.id;
 
         let payload = {
             table: schema.table,
             data: {
                 ...values.value,
-                id: (parseInt(findHighestId()) + 1), // Supabase should auto-increment
-                // user_id: supabaseStore.session?.user?.id // Supbase should auto-assign based on active session
+                user_id: supabaseStore?.session?.user?.id,
             }
         };
 
-        // Ideally Profile would be created when user registers -- then user can only update profile record
-        if (schema.table === "profile") await updateDbQuery.mutate(payload);
-        else await mutateDbQuery.mutate(payload);
+        console.log("values: ", payload)
 
-        // Refresh data in app *not working*
+        // Using server-side insert/update
+        // if (schema.table === "profile") await updateDbQuery.mutate(payload);
+        // else await mutateDbQuery.mutate(payload);
+        
+        // Ideally Profile would be created when user registers -- then user can only update profile record
+        // Direct client-side insert or update -- to use user_id without big security overhead
+        const response = (schema.table === "profile" && !fitnessStore.registrationView) 
+            ? await supabase
+                .from(schema.table)
+                .update(payload.data)
+                .eq('id', fitnessStore.fitnessTables?.profile[0].id)
+                .select()
+            : await supabase
+                .from(schema.table)
+                .insert(payload.data);
+
+        if (response.error) utilityStore.createAlert("error", `Something went wrong. Record not saved, ${response.error.message}`);
+        else utilityStore.createAlert("success", `${schema.table} record saved.`);
+
+        console.log("formSubmit.response: ", { response });
+
         await handleRefreshQueries();
+
+        if (props?.handleSubmit) props.handleSubmit();
     };
 
     const defaultValues = Object.assign(
         {},
         ...schema.columns
             .map((column) => ({
-                [column.name]: mapDefaultValue(column, {
-                    ...fitnessStore, 
-                    ...supabaseStore
-                })
+                [column.name]: props?.noDefaults 
+                    ? "" 
+                    : mapDefaultValue(column, {
+                        ...fitnessStore, 
+                        ...supabaseStore
+                    }) || ""
             }))
     );
 
@@ -287,6 +299,8 @@ const FormContainer = ({ schema, handleRefreshQueries }) => {
         form.reset();
         fitnessStore.setActiveSearchTab('recent'); // reset active search tab to recent
         fitnessStore.toggleDrawer();
+
+        if (props?.handleCancelClick) props.handleCancelClick();
     };
 
     const handleSubmit = () => {
@@ -336,7 +350,13 @@ const FormContainer = ({ schema, handleRefreshQueries }) => {
                                     {React.cloneElement(Field, {
                                         ...field,
                                         defaultValue: field.state.value,
-                                        onChange: (event) => field.handleChange(event.target.value),
+                                        onChange: (event) => {
+                                            field.handleChange(event.target.value);
+                                            
+                                            if (props?.injectChangeLogic) props.injectChangeLogic(field, form);
+                                            
+                                            return;
+                                        },
                                         onBlur: field.handleBlur,
                                         value: field.state.value
                                     })}

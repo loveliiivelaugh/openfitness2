@@ -3,8 +3,33 @@ import { BarChart } from '@mui/x-charts/BarChart';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { PieChart } from '@mui/x-charts/PieChart';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import { Box, IconButton, Grid, Stack, Typography } from '@mui/material';
-import { ArrowLeft, ArrowRight, BarChartOutlined, LineAxisOutlined, PieChartOutline, TableChart } from '@mui/icons-material';
+import { Box, IconButton, Grid, Stack, Typography, Modal, styled } from '@mui/material';
+import { 
+    ArrowLeft, 
+    ArrowRight, 
+    BarChartOutlined,
+    Close as CloseIcon, 
+    LineAxisOutlined, 
+    PieChartOutline, 
+    TableChart,
+    Expand 
+} from '@mui/icons-material';
+
+
+const Styled = {
+    ModalContainer: styled(Box)((theme) => ({
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: "90%",
+        backgroundColor: "#333" ||"theme.palette.background.paper",
+        border: '2px solid #000',
+        boxShadow: 24,
+        padding: "32px",
+        borderRadius: "24px"
+    }))
+};
 
 const defaults = {
     bar: {
@@ -67,6 +92,11 @@ const ChartButtons = (props) => {
             label: "Table",
             value: "table",
             icon: <TableChart />
+        },
+        {
+            label: "Expand",
+            value: "expand",
+            icon: <Expand />
         }
     ];
 
@@ -109,20 +139,48 @@ const FilterButtons = (props) => {
             ))}
         </Grid>
     )
-}
+};
 
+const ChartsWrapper = ({ ...props }) => {
+    const [isOpen, setIsOpen] = React.useState(false);
+    return (
+        <>
+            <ChartsContainer {...props} setIsOpen={setIsOpen} />
+            <Modal open={isOpen} onClose={() => setIsOpen(false)}>
+                <Styled.ModalContainer>
+                    <Grid container>
+                        <Grid item sm={12} sx={{ display: "flex", justifyContent: "flex-end" }}>
+                            <IconButton color="inherit" onClick={() => setIsOpen(false)}>
+                                <CloseIcon />
+                            </IconButton>
+                        </Grid>
+                        <Grid item sm={12}>
+                            <ChartsContainer {...props} />
+                        </Grid>
+                    </Grid>
+                </Styled.ModalContainer>
+            </Modal>
+        </>
+    )
+}
 
 const ChartsContainer = ({ 
     charts, 
     label = undefined, 
     defaultChart = "table", 
     disableChartButtons = false, 
-    disableFilterButtons = false
+    disableFilterButtons = false,
+    setIsOpen = () => {},
 }) => {
     
     const [activeChart, setActiveChart] = React.useState(defaultChart);
     const [filter, setFilter] = React.useState("Today");
     // console.log("ChartsContainer.data: ", filter);
+
+    const handleSetActiveChart = (value) => {
+        if (value === "expand") setIsOpen(true);
+        else setActiveChart(value);
+    };
 
     return (
         <>
@@ -130,11 +188,11 @@ const ChartsContainer = ({
             {/* Chart Container Header */}
             <Box sx={{ display:"flex", justifyContent: "space-between", p: 1 }}>
                 <Typography variant="body1">
-                    {charts?.[activeChart].title || label}
+                    {charts?.[activeChart]?.title || label}
                 </Typography>
 
                 <Stack>
-                    {!disableChartButtons && <ChartButtons setActiveChart={setActiveChart} />}
+                    {!disableChartButtons && <ChartButtons setActiveChart={(value) => handleSetActiveChart(value)} />}
                     {!disableFilterButtons && <FilterButtons setFilter={setFilter} />}
                 </Stack>
             </Box>
@@ -147,17 +205,17 @@ const ChartsContainer = ({
                 ) : ({
                     bar: (
                         <BarChart
-                            series={charts?.bar.series || defaults.bar.series}
+                            series={charts?.bar?.series || [] || defaults.bar.series}
                             height={290}
-                            xAxis={charts?.bar.xAxis || defaults.bar.xAxis}
+                            xAxis={charts?.bar?.xAxis || [] || defaults.bar.xAxis}
                             margin={{ top: 10, bottom: 30, left: 40, right: 10 }}
                             sx={{ maxWidth: "100%" }}
                         />
                     ),
                     line: (
                         <LineChart
-                            xAxis={charts?.line.xAxis || defaults.line.xAxis}
-                            series={charts?.line.series || defaults.line.series}
+                            xAxis={charts?.line?.xAxis || [] || defaults.line.xAxis}
+                            series={charts?.line?.series || [] || defaults.line.series}
                             // width={500}
                             height={300}
                             sx={{ height: 300, maxHeight: 300, width: '100%' }}
@@ -167,7 +225,7 @@ const ChartsContainer = ({
                         <PieChart
                             series={[
                                 {
-                                    data: charts?.pie.data || defaults.pie.data,
+                                    data: charts?.pie?.data || [] || defaults.pie.data,
                                 },
                             ]}
                             // width={400}
@@ -178,8 +236,8 @@ const ChartsContainer = ({
                     table: (
                         <div style={{ height: 300, maxHeight: 300, width: '100%' }}>
                             <DataGrid 
-                                rows={charts?.table.rows || []} 
-                                columns={charts?.table.columns || []} 
+                                rows={charts?.table?.rows || []} 
+                                columns={charts?.table?.columns || []} 
                                 slots={{ toolbar: GridToolbar }} 
                             />
                         </div>
@@ -190,4 +248,4 @@ const ChartsContainer = ({
     )
 }
 
-export default ChartsContainer
+export default ChartsWrapper

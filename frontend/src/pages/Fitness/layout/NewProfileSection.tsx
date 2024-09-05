@@ -19,7 +19,7 @@ const NewProfileSection = ({ data }: { data?: any}) => {
         <Grid container>
             <Grid item sm={6}>
                 <Grid container>
-                    <Grid item sm={8}>
+                    <Grid item xs={12} sm={8}>
                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "30%" }}>
                             <Avatar sx={{ width: 200, height: 200 }} />
                         </Box>
@@ -29,19 +29,19 @@ const NewProfileSection = ({ data }: { data?: any}) => {
                             </Button>
                         </CardActionArea>
                     </Grid>
-                    <Grid item sm={4}>
+                    <Grid item xs={12} sm={4}>
                         <List dense>
-                            {
+                            {data &&
                                 Object
-                                    .keys(data.table.rows[0])
-                                    .map((key: string) => (key !== "id") && (
+                                    .keys(data)
+                                    .map((key: string) => !["id", "user_id", "created_at"].includes(key) && (
                                         <ListItem key={key} component={ListItemButton}>
                                             <ListItemText 
                                                 primary={key} 
                                                 secondary={
                                                     (key === "height") 
-                                                        ? formatHeight(data.table.rows[0][key]) 
-                                                        : data.table.rows[0][key]
+                                                        ? formatHeight(data[key]) 
+                                                        : data[key]
                                                 } 
                                             />
                                         </ListItem>

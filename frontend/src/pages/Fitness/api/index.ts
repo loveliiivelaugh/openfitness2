@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import { supabase } from '../../../config/auth.config';
 
 const paths = {
     "auth": "/auth",
@@ -66,7 +66,7 @@ const fitnessQueries = ({
             console.log('foodsQuery.mutationFn: ', params)
             return (await client.get(`/openfitness/get-foods?food=${params.query}`)).data},
         enabled: false
-    }),
+    })
 });
 
 // general app queries
@@ -77,6 +77,11 @@ const queries = ({
         queryFn: async () => payload 
             ? (await (client as any)[method || "post"](queryPath, payload)).data
             : (await (client as any)[method || "get"](queryPath)).data
+    }),
+
+    queryDirect: (params: any) => ({
+        queryKey: [`direct-${params.table}`], 
+        queryFn: async () => (await supabase.from(params.table).select('*')).data
     })
 });
 

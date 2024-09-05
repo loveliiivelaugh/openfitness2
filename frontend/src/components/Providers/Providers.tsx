@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 
+import { AlertProvider } from './AlertProvider';
 import { PageTransitionWrapper, ThemeProvider } from '../../theme/ThemeProvider';
 import { AuthProvider } from '../Auth/Auth3';
 
@@ -16,7 +17,9 @@ export const Providers = ({ children }: { children: ReactNode }) => {
                     <PageTransitionWrapper>
                         <AuthProvider>
                             <LocalizationProvider dateAdapter={AdapterMoment}>
-                                {children}
+                                <AlertProvider>
+                                    {children}
+                                </AlertProvider>
                             </LocalizationProvider>
                         </AuthProvider>
                     </PageTransitionWrapper>

@@ -30,7 +30,7 @@ const MyCalendar = () => (
     <div style={{ width: "100%" }}>
         <Calendar
             localizer={localizer}
-            events={eventsList}
+            events={[] || eventsList}
             startAccessor="start"
             endAccessor="end"
             style={{
