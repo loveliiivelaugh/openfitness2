@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { useIndexedDB } from 'react-indexed-db-hook';
-import { useFitnessStore } from '../../../../utilities/store';
+import { useFitnessStore, useSupabaseStore } from '../../../../utilities/store';
 import { openfitnessScripts } from '../../../../utilities/scripts';
 import { paths, queries } from '.';
 
@@ -28,6 +28,7 @@ const usePrivateDatabase = () => {
 
 const useInitialQuery = () => {
     const fitnessStore = useFitnessStore();
+    const supabaseStore = useSupabaseStore();
     const privateDatabase = usePrivateDatabase();
     console.log("useInitialQuery.privateDatabase: ", { privateDatabase });
     const [data, setData] = useState<any>({});
@@ -37,7 +38,11 @@ const useInitialQuery = () => {
 
     const schemaQuery = useQuery(queries.query(paths.database + "/schema"));
     const directQueries = useQueries({ 
-        queries: [...topics].map((topic: string) => queries.queryDirect({ table: topic.toLowerCase() }))
+        queries: topics
+            .map((topic: string) => queries.queryDirect({ 
+                table: topic.toLowerCase(), 
+                id: (supabaseStore?.session?.user?.id || "") 
+            }))
     });
 
     const loadTables = async () => {

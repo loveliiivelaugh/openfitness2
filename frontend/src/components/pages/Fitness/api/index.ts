@@ -81,9 +81,13 @@ const queries = ({
             : (await (client as any)[method || "get"](queryPath)).data
     }),
 
-    queryDirect: (params: { table: string }) => ({
+    queryDirect: (params: { table: string, id: string }) => ({
         queryKey: [`direct-${params.table}`],
-        queryFn: async () => (await supabase.from(params.table).select('*')).data
+        queryFn: async () => (await supabase
+            .from(params.table)
+            .select('*')
+            .eq('user_id', params.id)
+        ).data
     })
 });
 
