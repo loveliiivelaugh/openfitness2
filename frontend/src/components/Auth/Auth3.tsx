@@ -78,20 +78,20 @@ export function AuthProvider({ children }: any) {
         console.log("handleForgotPassword: ", email);
     };
 
-    
-    useEffect(() => {
-        const jwt = localStorage.getItem("jwt");
+    // todo: Work on auto-login with JWT
+    // useEffect(() => {
+    //     const jwt = localStorage.getItem("jwt");
 
-        if (jwt) client.defaults.headers.common["Authorization"] = `Bearer ${jwt}`;
+    //     if (jwt) client.defaults.headers.common["Authorization"] = `Bearer ${jwt}`;
         
-        client.post('/auth/protected', { token: jwt })
-            .then(({ data }: any) => {
-                if (data) console.log('/auth/protected: Success!')
-                supabaseStore.setUserType("admin");
-                // supabaseStore.setSession(data);
-                // fitnessStore.setRegistrationView(false);
-            })
-    }, []);
+    //     client.post('/auth/protected', { token: jwt })
+    //         .then(({ data }: any) => {
+    //             if (data) console.log('/auth/protected: Success!')
+    //             supabaseStore.setUserType("admin");
+    //             // supabaseStore.setSession(data);
+    //             // fitnessStore.setRegistrationView(false);
+    //         })
+    // }, []);
 
 
     // if (fitnessStore.registrationView) return <RegistrationView />;

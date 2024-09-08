@@ -54,13 +54,13 @@ authRoutes
         }),
         async (c: Context) => {
             const validatedData: { token: string } = c.req.valid("json" as "json");
-            const jwt = await c.req.header("authorization")
+            // const jwt = await c.req.header("authorization")
             try {
-                console.log("In PROTECTED.jwt: ", jwt)
-                const { data, error } = await supabase.auth.getUser(validatedData.token);
+                // console.log("In PROTECTED.jwt: ", jwt)
+                // const { data, error } = await supabase.auth.getUser(validatedData.token);
                 
 
-                return c.json(data);
+                return c.json(validatedData);
 
             } catch (error: any) {
                 console.error(error, "SOMETHING WENT WRONG")
