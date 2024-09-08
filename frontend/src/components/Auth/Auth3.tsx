@@ -1,5 +1,5 @@
 import { Box, Button, styled } from '@mui/material';
-import { useEffect } from 'react';
+// import { useEffect } from 'react';
 
 import AuthForm from './AuthForm';
 import { useFitnessStore, useSupabaseStore } from '../../utilities/store';
