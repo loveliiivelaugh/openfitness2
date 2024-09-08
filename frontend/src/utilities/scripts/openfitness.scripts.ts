@@ -1,16 +1,15 @@
-// import * as schema from "../../database/schemas";
-
+// OpenFitness Scripts
 export const openfitnessScripts = {
     calculate: {
         // Basal Metabolic Rate
         bmr: (params: any) => {
-            const kg = (params.weight * 0.4535924);
+            const kg = ((params?.weight || 0) * 0.4535924);
             const bmr = (20 * kg);
             return bmr
         },
         // Thermic Effect of Eating
         tef: (params: any) => {
-            return (params.bmr * 0.1);
+            return ((params?.bmr || 0) * 0.1);
         },
         // Exercise Energy Expenditure
         eee: (params: { activity: string }) => {
@@ -97,22 +96,23 @@ export const openfitnessScripts = {
         })
     },
 
-    extractMacros: (nutrients: any, macroType: "fat" | "carbs" | "protein") => {
-
-        console.log("extractMacros: ", nutrients, macroType)
+    extractMacros: (nutrients: any, macroType: string) => {
+        // const response = await client.get("/openfitness/getItem/" + nutrients.nutrients.nix_item_id)
+        // console.log("extractMacros: ", nutrients, macroType)
         if (!nutrients[macroType]) return 0
         if (nutrients[macroType] === null) return 0
 
-        switch (macroType) {
-            case "fat":
-                return (nutrients[macroType || "total_fat"] * 9)
-            case "carbs":
-                return (nutrients[macroType || "total_carbohydrate"] * 4)
-            case "protein":
-                return (nutrients[macroType || "protein"] * 4)
-            default:
-                return 0
-        }
+        return nutrients[macroType];
+        // switch (macroType) {
+        //     case "fat":
+        //         return (nutrients[macroType || "total_fat"] * 9)
+        //     case "carbs":
+        //         return (nutrients[macroType || "total_carbohydrate"] * 4)
+        //     case "protein":
+        //         return (nutrients[macroType || "protein"] * 4)
+        //     default:
+        //         return 0
+        // }
     },
 
     checkIsTodaysDate: (date: Date) => {
@@ -138,22 +138,22 @@ export const openfitnessScripts = {
     getFoodDataDeduction: (foodTable: any) => ({
         // Calculate the total calories consumed for the day
         todays_calories_consumed: openfitnessScripts.getTodaysData(foodTable)
-            .reduce((total: number, food: any) => (total + food.calories), 0),
+            .reduce((total: number, { nutrients }: any) => (total + nutrients.nf_calories), 0),
 
         total_fat: openfitnessScripts.getTodaysData(foodTable)
-            .reduce((totalFat: number, nutrients: any) => (
-                openfitnessScripts
-                    .extractMacros(nutrients, "fat") + totalFat
+            .reduce((totalFat: number, { nutrients }: any) => (
+                (openfitnessScripts
+                    .extractMacros(nutrients, "nf_total_fat") * 9) + totalFat
                 ), 0),
         total_carbs: openfitnessScripts.getTodaysData(foodTable)
-            .reduce((totalCarbs: number, nutrients: any) => (
-                openfitnessScripts
-                    .extractMacros(nutrients, "carbs") + totalCarbs
+            .reduce((totalCarbs: number, { nutrients }: any) => (
+                (openfitnessScripts
+                    .extractMacros(nutrients, "nf_total_carbohydrate") * 4) + totalCarbs
                 ), 0),
         total_protein: openfitnessScripts.getTodaysData(foodTable)
-            .reduce((totalProtein: number, nutrients: any) => (
-                openfitnessScripts
-                    .extractMacros(nutrients, "protein") + totalProtein
+            .reduce((totalProtein: number, { nutrients }: any) => (
+                (openfitnessScripts
+                    .extractMacros(nutrients, "nf_protein") * 4) + totalProtein
                 ), 0),
     }),
 
@@ -187,7 +187,7 @@ export const openfitnessScripts = {
             xAxis[0].data.push(date.getDate() as never);
         }
 
-        console.log("getChartsData.foodDataDeduction: ", profileTable, foodDataDeduction);
+        // console.log("getChartsData.foodDataDeduction: ", profileTable, foodDataDeduction);
         const chartsData = {
             profile: {
                 table: {
@@ -222,28 +222,28 @@ export const openfitnessScripts = {
                     filters: ["Today", "Yesterday", "Last Week", "Last 30 Days", "All Time"],
                     series: [
                         {
-                            data: [] || [
+                            data: [
                                 foodDataDeduction?.total_fat || 0, // || (5000 * 0.2),
                                 foodDataDeduction?.total_carbs || 0, // || (5000 * 0.45),
                                 foodDataDeduction?.total_protein || 0, // || (5000 * 0.35)
                             ]
                         },
                         {
-                            data: [] || [
+                            data: [
                                 foodDataDeduction?.total_fat || 0, // || (5000 * 0.2),
                                 foodDataDeduction?.total_carbs || 0, // || (5000 * 0.45),
                                 foodDataDeduction?.total_protein || 0, // || (5000 * 0.35)
                             ]
                         },
                         {
-                            data: [] || [
+                            data: [
                                 foodDataDeduction?.total_fat || 0, // || (5000 * 0.2),
                                 foodDataDeduction?.total_carbs || 0, // || (5000 * 0.45),
                                 foodDataDeduction?.total_protein || 0, // || (5000 * 0.35)
                             ]
                         },
                         {
-                            data: [] || [
+                            data: [
                                 foodDataDeduction?.total_fat || 0, // || (5000 * 0.2),
                                 foodDataDeduction?.total_carbs || 0, // || (5000 * 0.45),
                                 foodDataDeduction?.total_protein || 0, // || (5000 * 0.35)
@@ -298,9 +298,9 @@ export const openfitnessScripts = {
                         "abs"
                     ].map((muscleGroup, index) => ({
                         id: index,
-                        value:  30 || openfitnessScripts.getTodaysData(exerciseTable)
-                            .filter((exercise: any) => (exercise.muscle_group === muscleGroup))
-                            .reduce((total: number, exercise: any) => (total + exercise.calories_burned), 0),
+                        value:  openfitnessScripts.getTodaysData(exerciseTable)
+                            .filter((exercise: { muscle: string }) => (exercise.muscle === muscleGroup))
+                            .reduce((total: number, exercise: any) => (total + (exercise?.calories_burned || 50)), 0),
                         label: muscleGroup
                     }))
                 },
@@ -513,9 +513,13 @@ export const openfitnessScripts = {
                     title: "Today's Weight",
                     series: [
                         {
-                            data: [] || [
-                                215, 205
-                            ]
+                            data: profileTable?.[0]?.weight ? [
+                                profileTable[0].weight, {
+                                    "lose": (profileTable[0].weight - 10),
+                                    "gain": (profileTable[0].weight + 10),
+                                    "maintain": profileTable[0].weight
+                                }[profileTable[0].goal as "lose" | "gain" | "maintain"]
+                            ] : []
                         }
                     ],
                     xAxis: [
@@ -539,7 +543,7 @@ export const openfitnessScripts = {
                     data: [
                         {
                             id: 0,
-                            value: 215 || openfitnessScripts.getTodaysData(weightTable),
+                            value: profileTable?.[0]?.weight || openfitnessScripts.getTodaysData(weightTable),
                             label: "Weight"
                         }
                     ]
@@ -634,14 +638,24 @@ export const openfitnessScripts = {
             // Total calories from steps + total_exercise_calories
             const total_active_calories = (total_steps_calories + exerciseDataDeduction.total_exercise_calories);
 
+            // console.log(
+            //     "data extract for total cals: ",
+            //     profileTable,
+            //     total_active_calories,
+            //     foodDataDeduction
+            // )
             const dataExtract = {
                 ...foodDataDeduction,
                 ...exerciseDataDeduction,
                 total_calories_remaining: (
                     // Total Daily Energy Expenditure (TDEE) *Minimum Daily Calories Required*
-                    profileTable.tdee 
+                    profileTable?.[0]?.tdee 
                     // Algorithmic Adjustment to TDEE based on weight goal
-                    + profileTable.goal
+                    + ({
+                        lose: (-500),
+                        gain: 500,
+                        maintain: 0
+                    }[profileTable?.[0]?.goal as "lose" | "gain" | "maintain"] || 0)
                     // Add total active calories to daily calories burned
                     + total_active_calories
                     // Minus the amount of daily calories consumed 
@@ -649,6 +663,7 @@ export const openfitnessScripts = {
                 ),
             };
 
+            // console.log("openfitness.scripts.getAllTables.dataExtract: ", dataExtract);
 
             const macrosKpis = [
                 {
@@ -679,6 +694,7 @@ export const openfitnessScripts = {
             ];
 
             const tables = {
+                schemas: props.schemas,
                 profile: profileTable,
                 exercise: exerciseTable,
                 food: foodTable,

@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { createMiddleware } from 'hono/factory';
 
+import { Client } from '@notionhq/client';
+
+const notion = new Client({ auth: Bun.env.NOTION_API_KEY });
 
 interface BasicAuthConfig {
     username: string;
@@ -63,7 +66,8 @@ const initApiClients = () => createMiddleware(async (c, next) => {
 
     const clients = {
         nutritionixClient,
-        exerciseClient
+        exerciseClient,
+        notionClient: notion
     };
 
     c.set('clients', clients);

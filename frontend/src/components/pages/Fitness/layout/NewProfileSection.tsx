@@ -3,11 +3,8 @@ import {
     List, ListItem, ListItemButton, ListItemText 
 } from "@mui/material"
 import MyCalendar from "./Calendar";
-// import { useQuery } from "@tanstack/react-query"
-// import { paths, queries } from "../api"
 
-const NewProfileSection = ({ data }: { data?: any}) => {
-    console.log("NewProfileSection: ", data);
+const NewProfileSection = ({ data, filterList }: { data?: any, filterList?: (key: string) => boolean }) => {
 
     const formatHeight = (heightInches: number) => {
         const feet = Math.floor(heightInches / 12).toString();
@@ -23,7 +20,7 @@ const NewProfileSection = ({ data }: { data?: any}) => {
                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "30%" }}>
                             <Avatar sx={{ width: 200, height: 200 }} />
                         </Box>
-                        <CardActionArea sx={{ mt: 2 }}>
+                        <CardActionArea sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
                             <Button variant="text" color="inherit">
                                 Upload Photo
                             </Button>
@@ -34,7 +31,7 @@ const NewProfileSection = ({ data }: { data?: any}) => {
                             {data &&
                                 Object
                                     .keys(data)
-                                    .map((key: string) => !["id", "user_id", "created_at"].includes(key) && (
+                                    .map((key: string) => (filterList ? filterList(key) : true) && (
                                         <ListItem key={key} component={ListItemButton}>
                                             <ListItemText 
                                                 primary={key} 

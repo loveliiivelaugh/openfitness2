@@ -1,5 +1,5 @@
 import { Alert, Collapse, Snackbar } from "@mui/material";
-import { useUtilityStore } from "../../store";
+import { useUtilityStore } from "../../utilities/store";
 
 
 export const AlertProvider = ({ children }: { children: any }) => {

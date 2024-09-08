@@ -3,15 +3,15 @@ import { Grid, Typography } from "@mui/material";
 
 import FormContainer from "../Fitness/layout/forms/FormContainer"
 import { paths, queries } from "../Fitness/api"
-import { openfitnessScripts } from "../../scripts"
-import { useFitnessStore, useSupabaseStore } from "../../store"
+import { openfitnessScripts } from "../../../utilities/scripts"
+import { useFitnessStore, useSupabaseStore } from "../../../utilities/store"
 
 
 const RegistrationView = (props?: { handleRefreshQueries: () => void }) => {
     const fitnessStore = useFitnessStore();
     const supabaseStore = useSupabaseStore();
     const schemaQuery = useQuery(queries.query(paths.database + "/schema"))
-    console.log("schemaQuery: ", schemaQuery)
+    // console.log("schemaQuery: ", props, schemaQuery)
     return (
         <Grid container>
             <Grid item xs={12}>
@@ -45,9 +45,7 @@ const RegistrationView = (props?: { handleRefreshQueries: () => void }) => {
                             supabaseStore.setUserType(null);
                             supabaseStore.setSession(null);
                         }}
-                        handleSubmit={() => {
-                            fitnessStore.setRegistrationView(false);
-                        }}
+                        handleSubmit={() => fitnessStore.setRegistrationView(false)}
                     />
                 </Grid>
             )}

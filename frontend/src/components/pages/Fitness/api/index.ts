@@ -1,11 +1,13 @@
 import axios from 'axios';
-import { supabase } from '../../../config/auth.config';
+import { schema, supabase } from '../../../../utilities/config/auth.config';
+import QueryWrapper from './QueryWrapper';
 
 const paths = {
     "auth": "/auth",
     "appConfig": "/appConfig",
     "database": "/database",
     "openfitness": "/openfitness",
+    "github": "/github",
     "appDepot": (import.meta.env.MODE === "development")
         ? "http://localhost:3000"
         : import.meta.env.VITE_HOME_APP,
@@ -79,10 +81,11 @@ const queries = ({
             : (await (client as any)[method || "get"](queryPath)).data
     }),
 
-    queryDirect: (params: any) => ({
-        queryKey: [`direct-${params.table}`], 
+    queryDirect: (params: { table: string }) => ({
+        queryKey: [`direct-${params.table}`],
         queryFn: async () => (await supabase.from(params.table).select('*')).data
     })
 });
 
-export { client, paths, fitnessQueries, queries };
+export { client, paths, fitnessQueries, queries, QueryWrapper };
+

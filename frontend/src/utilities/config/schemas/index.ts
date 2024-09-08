@@ -88,20 +88,6 @@ const profile = pgTable('profile', {
     bmr: integer('bmr').notNull(),
 });
 
-const bug = pgTable('bug_report', {
-    id: serial("id").primaryKey(),
-    name: text("name").notNull(),
-    message: text("message").notNull(),
-    severity: text("severity"),
-});
-
-const feature = pgTable('feature_report', {
-    id: serial("id").primaryKey(),
-    name: text("name").notNull(),
-    message: text("message").notNull(),
-    urgency: text("urgency"),
-});
-
 export {
     // Fitness App
     tables,
@@ -110,7 +96,5 @@ export {
     food,
     sleep,
     steps,
-    weight,
-    bug,
-    feature
+    weight
 };

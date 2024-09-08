@@ -23,7 +23,7 @@ import { Navbar } from './layout/Navbar';
 import NewProfileSection from './layout/NewProfileSection';
 
 // Services
-import { useFitnessStore, useUtilityStore  } from '../../store';
+import { useFitnessStore, useUtilityStore  } from '../../../utilities/store';
 import useInitialQuery from './api/useInitialQuery';
 import { fitnessQueries, paths, queries } from './api';
 import RegistrationView from '../Registration/RegistrationView';
@@ -44,7 +44,7 @@ const Fitness = () => {
     const fitnessStore = useFitnessStore();
     const initialQueries = useQueries({ queries: queryPaths.map((queryPath: string) => queries.query(queryPath)) });
     const initialQuery = useInitialQuery();
-    const directQueries = useQueries({ queries: [...topics].map((topic: string) => queries.queryDirect({ table: topic.toLowerCase() })) });
+
     // Exercises and Foods Search Queries -- Search for Exercises and Foods for logging
     const exercisesQuery = useMutation(fitnessQueries.exercisesQuery());
     const foodsQuery = useMutation(fitnessQueries.foodsQuery());
@@ -54,20 +54,11 @@ const Fitness = () => {
     }, []);
 
     const [
-        readDatabaseQuery, // Get Schema's to dynamically build fields for each of the forms
-        fitnessTablesQuery, // Get Data for the charts / visualizations
+        __, // Get Schema's to dynamically build fields for each of the forms
+        _, // Get Data for the charts / visualizations
         recentFoodsQuery,
         recentExercisesQuery,
     ] = initialQueries;
-
-    const [
-        _,
-        __,
-        ____,
-        profileQuery
-    ] = directQueries;
-
-    console.log("appQueries: ", initialQuery.data, profileQuery, directQueries);
 
     const form = useForm({
         defaultValues: { searchInput: "" },
@@ -85,7 +76,6 @@ const Fitness = () => {
 
     async function handleRefreshQueries() {
         return await Promise.all([
-            fitnessTablesQuery.refetch(),
             recentFoodsQuery.refetch(),
             recentExercisesQuery.refetch(),
             initialQuery.reload()
@@ -105,10 +95,10 @@ const Fitness = () => {
     return ({
         "pending": <div>Loading...</div>,
         "loading": <div>Tables are getting ready...</div>,
-        "success": (!initialQuery.data?.profile || fitnessStore.registrationView) 
+        "success": (!initialQuery.data?.profile?.length || fitnessStore.registrationView) 
             ? <RegistrationView handleRefreshQueries={handleRefreshQueries} /> 
             : (
-                <Grid container my={10} p={4} sx={{ maxWidth: "100vw" }}>
+                <Grid container my={14} p={4} sx={{ maxWidth: "100vw" }}>
 
                     <Navbar />
 
@@ -117,7 +107,10 @@ const Fitness = () => {
                         {/* <DateTimeLabel /> */}
                     </Grid>
 
-                    <NewProfileSection data={initialQuery.data?.profile?.[0]} />
+                    <NewProfileSection
+                        data={initialQuery.data?.profile?.[0]}
+                        filterList={(key: string)=> !["id", "user_id", "created_at"].includes(key)}
+                    />
                     
                     {null ? (
                         <Grid item sm={12}>
@@ -200,14 +193,14 @@ const Fitness = () => {
                                 justifyContent: "center" 
                             }}
                         >
-                            {(!readDatabaseQuery.isLoading && (fitnessStore.drawerAnchor !== "bottom")) 
+                            {(!initialQuery.isLoading && (fitnessStore.drawerAnchor !== "bottom")) 
                                 && Object.assign(
                                     {}, 
                                     ...topics.map((topic: string, index: number) => ({ 
                                         [topic.toLowerCase()]: (
                                             <FormContainer 
                                                 key={index} 
-                                                schema={readDatabaseQuery?.data
+                                                schema={initialQuery?.data?.schemas
                                                     .find(({ table }: { table: string }) => (table === topic.toLowerCase()))
                                                 }
                                                 handleRefreshQueries={handleRefreshQueries}
@@ -341,7 +334,7 @@ const Fitness = () => {
                             showLabels
                             variant="scrollable"
                             scrollButtons="auto"
-                            value={0}
+                            // value={0}
                             sx={{ zIndex: 1000, pt: 2 }}
                         >
                             {topics.map((item: string, index: number) => (

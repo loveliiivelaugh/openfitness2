@@ -11,16 +11,16 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import moment from 'moment';
 
 import { BasicDatePicker, BasicTimePicker } from './BasicDatePicker';
-import { useFitnessStore, useSupabaseStore, useUtilityStore } from '../../../../store';
-import { fitnessQueries } from '../../api';
-import { supabase } from '../../../../config/auth.config';
-import { openfitnessScripts } from '../../../../scripts';
+import { useFitnessStore, useSupabaseStore, useUtilityStore } from '../../../../../utilities/store';
+import { client, fitnessQueries } from '../../api';
+import { supabase } from '../../../../../utilities/config/auth.config';
+import { openfitnessScripts } from '../../../../../utilities/scripts';
 
 
 const mapDefaultValue = (column, store) => {
-    const profile = store.fitnessTables?.profile?.[0];
+    const [profile] = store.fitnessTables?.profile;
 
-    console.log("mapDefaultValue: ", column, store, profile);
+    // console.log("mapDefaultValue: ", column, store, profile);
 
     switch (column.name) {
         // Profile Default Values
@@ -213,7 +213,7 @@ const FormContainer = ({ schema, handleRefreshQueries, ...props }) => {
     const mutateDbQuery = useMutation(fitnessQueries.writeTableQuery());
     const updateDbQuery = useMutation(fitnessQueries.updateTableQuery());
 
-    console.log({ fitnessStore, supabaseStore });
+    // console.log({ fitnessStore, supabaseStore });
 
     const fieldsArray = schema.columns
         .filter(column => !excludedColumns.includes(column.name))
@@ -232,27 +232,44 @@ const FormContainer = ({ schema, handleRefreshQueries, ...props }) => {
         delete values.value.created_at;
         delete values.value.id;
 
+        // Get full nix details if food
+        const additionalDetails = (schema.table === "food")
+            ? (await client.get("/openfitness/get-single-food?id=" + values.value.nutrients.nix_item_id)).data
+            : {};
+        // console.log("additionalDetails: ", additionalDetails);
+
         let payload = {
             table: schema.table,
             data: {
                 ...values.value,
-                user_id: supabaseStore?.session?.user?.id,
+                ...(schema.table === "food") && {
+                    nutrients: {
+                        ...values.value.nutrients,
+                        ...additionalDetails?.foods[0]
+                    }
+                },
+                user_id: supabaseStore?.session?.user?.id
             }
         };
 
-        console.log("values: ", payload)
+        // console.log("values: ", payload)
 
         // Using server-side insert/update
         // if (schema.table === "profile") await updateDbQuery.mutate(payload);
         // else await mutateDbQuery.mutate(payload);
         
+        const [currentProfile] = fitnessStore.fitnessTables?.profile;
         // Ideally Profile would be created when user registers -- then user can only update profile record
         // Direct client-side insert or update -- to use user_id without big security overhead
-        const response = (schema.table === "profile" && !fitnessStore.registrationView) 
+        const response = (
+            (schema.table === "profile")
+            && !fitnessStore.registrationView 
+            && currentProfile
+        ) 
             ? await supabase
                 .from(schema.table)
                 .update(payload.data)
-                .eq('id', fitnessStore.fitnessTables?.profile[0].id)
+                .eq('id', currentProfile?.id)
                 .select()
             : await supabase
                 .from(schema.table)
@@ -261,7 +278,7 @@ const FormContainer = ({ schema, handleRefreshQueries, ...props }) => {
         if (response.error) utilityStore.createAlert("error", `Something went wrong. Record not saved, ${response.error.message}`);
         else utilityStore.createAlert("success", `${schema.table} record saved.`);
 
-        console.log("formSubmit.response: ", { response });
+        // console.log("formSubmit.response: ", { response });
 
         await handleRefreshQueries();
 
@@ -298,7 +315,7 @@ const FormContainer = ({ schema, handleRefreshQueries, ...props }) => {
     const handleCancelClick = () => {
         form.reset();
         fitnessStore.setActiveSearchTab('recent'); // reset active search tab to recent
-        fitnessStore.toggleDrawer();
+        fitnessStore.toggleDrawer({ open: false, anchor: "bottom" });
 
         if (props?.handleCancelClick) props.handleCancelClick();
     };

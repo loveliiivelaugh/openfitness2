@@ -3,7 +3,7 @@ import {
     ListItemIcon,ListItemButton
 } from '@mui/material';
 
-import { useFitnessStore } from '../../../store';
+import { useFitnessStore } from '../../../../utilities/store';
 
 
 const ListContent = ({ data }: { data: any }) => {

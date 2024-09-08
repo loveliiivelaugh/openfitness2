@@ -1,9 +1,10 @@
 import { Box, Button, styled } from '@mui/material';
-// import { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import AuthForm from './AuthForm';
-import { useFitnessStore, useSupabaseStore } from '../../store';
-import { supabase } from '../../config/auth.config';
+import { useFitnessStore, useSupabaseStore } from '../../utilities/store';
+import { supabase } from '../../utilities/config/auth.config';
+import { client } from '../pages/Fitness/api';
 // import RegistrationView from '../../pages/Registration/RegistrationView';
 
 
@@ -26,27 +27,43 @@ const Styled = {
 export function AuthProvider({ children }: any) {
     const supabaseStore = useSupabaseStore();
     const fitnessStore = useFitnessStore();
-
+    
     async function handleGuestSignIn() {
         supabaseStore.setUserType("guest");
         
-        const { data } = await supabase.auth.signInAnonymously();
+        // If Auth from Backend
+        const response = (await client.post('/auth/login/guest')).data;
+        supabaseStore.setSession(response);
+        // If auth from Front end
+        // const { data } = await supabase.auth.signInAnonymously();
+        // console.log("handleGuestSignIn: ", response);
         fitnessStore.setRegistrationView(true);
-        supabaseStore.setSession(data.session as any);
+        // supabaseStore.setSession(data.session as any);
     };
 
     async function handleSubmit(form: { email: string, password: string }, loginType: string) {
         supabaseStore.setUserType("admin");
 
         if (loginType === "signin") {
-            const { data }  = await supabase.auth.signInWithPassword(form);
-            supabaseStore.setSession(data.session as any);
+            // If Auth from Backend
+            const response = (await client.post('/auth/login/user', form)).data;
+            // console.log("handleSubmit: ", response);
+            supabaseStore.setSession(response);
+            const { data } = await supabase.auth.setSession(response.session)
+            if (data) console.log("setSession: Success!");
+            // // If auth from Front end
+            // const { data }  = await supabase.auth.signInWithPassword(form);
+            // supabaseStore.setSession(data.session as any);
         }
 
         if (loginType === "signup") {
-            const { data } = await supabase.auth.signUp(form);
+            // If Auth from Backend
+            const response = await client.post('/auth/signup', form);
+            // console.log("handleSubmit:.signup:  ", response);
+            // // If auth from Front end
+            // const { data } = await supabase.auth.signUp(form);
             fitnessStore.setRegistrationView(true);
-            supabaseStore.setSession(data as any);
+            supabaseStore.setSession(response.data as any);
         }
     };
 
@@ -61,22 +78,20 @@ export function AuthProvider({ children }: any) {
         console.log("handleForgotPassword: ", email);
     };
 
-    // useEffect(() => {
-    //     // Auto-login
-    //     const storageKeys = Object.keys(localStorage);
+    
+    useEffect(() => {
+        const jwt = localStorage.getItem("jwt");
 
-    //     if (storageKeys[0].includes("auth-token")) {
-    //         const key = storageKeys[0];
-    //         (async () => {
-    //             const token = JSON.parse(localStorage.getItem(key) as string)?.access_token;
-    //             console.log("localStorage.login.token: ", token)
-    //             // supabase.auth.getUser();
-    //             const response = await supabase.auth.getUser(token);
-    //             // const response = await supabase.auth.getUser(JSON.parse(localStorage.getItem(key) as string)?.access_token);
-    //             console.log("localStorage.login.response: ", response);
-    //         })();
-    //     };
-    // }, []);
+        if (jwt) client.defaults.headers.common["Authorization"] = `Bearer ${jwt}`;
+        
+        client.post('/auth/protected', { token: jwt })
+            .then(({ data }: any) => {
+                if (data) console.log('/auth/protected: Success!')
+                supabaseStore.setUserType("admin");
+                // supabaseStore.setSession(data);
+                // fitnessStore.setRegistrationView(false);
+            })
+    }, []);
 
 
     // if (fitnessStore.registrationView) return <RegistrationView />;

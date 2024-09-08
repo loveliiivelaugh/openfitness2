@@ -6,10 +6,12 @@
   "dependencies": {
     "@emotion/styled": "^11.13.0",
     "@mui/material": "^5.16.7",
+    "@notionhq/client": "^2.2.15",
     "@supabase/supabase-js": "^2.45.1",
     "axios": "^1.7.5",
     "drizzle-orm": "^0.33.0",
     "hono": "^4.5.4",
+    "octokit": "^4.0.2",
     "postgres": "^3.4.4",
     "stripe": "^16.7.0"
   },

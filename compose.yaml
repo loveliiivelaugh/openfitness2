@@ -1,0 +1,83 @@
+## ** IN DEVELOPMENT **
+
+services:
+  # OpenFitness2 Frontend / Service
+  frontend:
+    depends_on:
+      - backend
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3001:3001"
+    # specify the environment variables for the web service
+    # these environment variables will be available inside the container
+    environment:
+      VITE_API_URL: http://localhost:5001
+      VITE_HOSTNAME: {{ .Env.HOSTNAME }}
+    develop:
+      # specify the files to watch for changes
+      watch:
+        # it'll watch for changes in package.json and package-lock.json and rebuild the container and image if there are any changes
+        - path: ./frontend/package.json
+          action: rebuild
+        - path: ./frontend/bun.lockb
+          action: rebuild
+        
+        # it'll watch for changes in the frontend directory and sync the changes with the container real time
+        - path: ./frontend
+          target: /app
+          action: sync
+
+  # Server / Backend
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "5001:5001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: openfitness-databse
+    # establish docker compose watch mode for the api service
+    develop:
+      # specify the files to watch for changes
+      watch:
+        # it'll watch for changes in package.json and package-lock.json and rebuild the container and image if there are any changes
+        - path: ./backend/package.json
+          action: rebuild
+        - path: ./backend/bun.lockb
+          action: rebuild
+        
+        # it'll watch for changes in the backend directory and sync the changes with the container real time
+        - path: ./backend
+          target: /app
+          action: sync
+
+  # Database PostgresSQL
+  postgres:
+    image: postgres:latest
+    build: ./backend/database
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: openfitness-databse
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
