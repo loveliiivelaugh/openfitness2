@@ -17,10 +17,12 @@ const basicAuthConfig = <BasicAuthConfig>{
 
 const trustedSources: string[] = [
     "https://openfitness2.netlify.app",
+    "https://cherrytopframework.netlify.app",
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
-    'http://localhost:3003'
+    'http://localhost:3003',
+    "http://localhost:5052"
 ];
 
 const allowedHeaders: string[] = [
