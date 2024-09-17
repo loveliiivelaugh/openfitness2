@@ -1,3 +1,4 @@
+import { Context } from "hono";
 
 const buildMarkdown = async ({ notionPageContent }: any) => {
     const { results } = notionPageContent;
@@ -31,4 +32,25 @@ async function extractImages({ notionPageContent }: any) {
         .filter(Boolean);
 };
 
-export const notionScripts = { buildMarkdown, extractImages };
+async function handleListReturn(c: Context) {
+    const { notionClient } = c.var.clients;
+    try {
+
+        const homepageChildren = await notionClient.blocks.children.list({
+            block_id: "2a822d5e-ac09-4df3-9981-588809928086",
+            page_size: 50,
+        });
+
+        return c.json(
+            homepageChildren.results
+                .filter((block: { type: string }) => (block.type === "child_page"))
+        );
+
+    } catch (error) {
+        console.error(error)
+
+        return c.json({ message: "something went wrong", error })
+    };
+};
+
+export const notionScripts = { buildMarkdown, extractImages, handleListReturn };

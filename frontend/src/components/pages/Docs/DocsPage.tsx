@@ -4,10 +4,9 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useNavigate, useParams } from "react-router-dom";
-
+import moment from "moment";
 
 import FormContainer from '../Fitness/layout/forms/FormContainer';
-import { Navbar } from "../Fitness/layout/Navbar";
 import { NotionPage } from "../../NotionPage";
 import { paths, QueryWrapper } from "../Fitness/api";
 
@@ -31,36 +30,32 @@ const DocsView = () => {
     const { type } = useParams();
 
     const title = {
-        "documentation": "Documentation Report",
-        "roadmap": "Roadmap Request"
+        "documentation": "Documentation",
+        "roadmap": "Roadmap"
     }[type as "documentation" | "roadmap"] || "";
 
     return (
-        <>
-            <Navbar />
-            <Container maxWidth="lg">
-                <Grid container sx={{ mt: 10, p: 2 }}>
-                        {/* Header */}
-                    <Grid item xs={12} sx={{ textAlign: "center" }}>
-                        <Typography variant="h4">
-                            {title}
-                        </Typography>
-                    </Grid>
-                        {/* Content */}
-                    <Grid item sm={12}>
-                        <NotionPage path={paths.openfitness + `/notion/${type}`} />
-                    </Grid>
+        <Container maxWidth="lg">
+            <Grid container sx={{ mt: 18, p: 2 }}>
+                    {/* Header */}
+                <Grid item xs={12} sx={{ textAlign: "center" }}>
+                    <Typography variant="h4">
+                        {title}
+                    </Typography>
                 </Grid>
-            </Container>
-        </>
+                    {/* Content */}
+                <Grid item sm={12}>
+                    <NotionPage path={paths.openfitness + `/notion/${type}`} />
+                </Grid>
+            </Grid>
+        </Container>
     );
 };
 
 const ChangelogView = () => (
     <Styled.ChangelogContainer>
-        <Navbar />
         <Container maxWidth="md">
-            <Grid container sx={{ mt: 10, p: 2 }}>
+            <Grid container sx={{ mt: 16, p: 2 }}>
                 <Grid item xs={12} sx={{ textAlign: "center" }}>
                     <Typography variant="h4">
                         Changelog
@@ -81,7 +76,7 @@ const ChangelogView = () => (
                                 <ListItem key={entry.node_id}>
                                     <ListItemText 
                                         primary={entry.commit.message} 
-                                        secondary={entry.commit.committer.date}
+                                        secondary={moment(entry.commit.committer.date).fromNow()}
                                     />
                                 </ListItem>
                             ))}
@@ -103,28 +98,25 @@ const ReportingView = () => {
     }[type as "bug" | "feature"] || "";
 
     return (
-        <>
-            <Navbar />
-            <Styled.ReportingContainer>
-                <Grid item sm={12}>
-                    <Typography variant="h4" component="p">
-                        {title}
-                    </Typography>
-                </Grid>
-                <Grid item sm={12}>
-                    <QueryWrapper path={paths.database + "/schema"}>
-                        {({ data }) => data && (
-                            <FormContainer 
-                                schema={data.find(({ table }: { table: string }) => (table === type))}
-                                handleRefreshQueries={() => {}}
-                                noDefaults
-                                handleCancelClick={() => navigate("/")}
-                            />
-                        )}
-                    </QueryWrapper>
-                </Grid>
-            </Styled.ReportingContainer>
-        </>
+        <Styled.ReportingContainer>
+            <Grid item sm={12}>
+                <Typography variant="h4" component="p">
+                    {title}
+                </Typography>
+            </Grid>
+            <Grid item sm={12}>
+                <QueryWrapper path={paths.database + "/schema"}>
+                    {({ data }) => data && (
+                        <FormContainer 
+                            schema={data.find(({ table }: { table: string }) => (table === type))}
+                            handleRefreshQueries={() => {}}
+                            noDefaults
+                            handleCancelClick={() => navigate("/")}
+                        />
+                    )}
+                </QueryWrapper>
+            </Grid>
+        </Styled.ReportingContainer>
     );
 };
 

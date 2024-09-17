@@ -4,6 +4,9 @@ import {
 } from "react-router-dom";
 import { FitnessApp } from "../pages";
 import DocsPage from "../pages/Docs/DocsPage";
+import PlanningPage from "../pages/Planning/PlanningPage";
+import { PageTransitionWrapper } from "../../utilities/theme/ThemeProvider";
+import { Navbar } from "../pages/Fitness/layout/Navbar";
 
 const appRoutes = [
     {
@@ -19,7 +22,20 @@ const appRoutes = [
         path: "/reporting/:type",
         element: (<DocsPage />),
     },
-];
+    {
+        path: "/planning/exercise",
+        element: (<PlanningPage />),
+    }
+].map((route) => ({ 
+    ...route, 
+    id: route.path,
+    element: (
+        <PageTransitionWrapper>
+            <Navbar />
+            {route.element}
+        </PageTransitionWrapper>
+    )
+}));
 
 const appRouter = createBrowserRouter(appRoutes);
 

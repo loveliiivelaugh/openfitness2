@@ -117,36 +117,55 @@ openfitnessRoutes
         }
     })
 
-/**
- * @openapi
- * /api/openfitness/fitness_tables:
- *   get:
- *     description: Gets all tables for OpenFitness and formats and organizes them
- *       for the front end to display in visualizations.
- *     responses:
- */
-    .get('/notion/:type', async (c: Context) => {
+    /**
+     * @openapi
+     * /api/openfitness/fitness_tables:
+     *   get:
+     *     description: Gets all tables for OpenFitness and formats and organizes them
+     *       for the front end to display in visualizations.
+     *     responses:
+     */
+    .get('/api/v1/notion/:type', async (c: Context) => {
         const { type } = await c.req.param();
         const { notionClient } = c.var.clients;
-        const {
-            NOTION_DOCUMENTATION_PAGE_ID: documentation,
-            NOTION_ROADMAP_PAGE_ID: roadmap
-        } = Bun.env;
 
-        // Openfitness2 Docs Notion Page ID
-        // Documentation or Roadmap
-        const pageId = ({ documentation, roadmap }[type]);
-    
+        if (type === "list") return notionScripts.handleListReturn(c);
+
+        const pages = { "Home": "2a822d5e-ac09-4df3-9981-588809928086" };
+
         try {
-            const notionPageContent = await notionClient.blocks.children.list({
-                block_id: pageId,
+
+            const homepageChildren = await notionClient.blocks.children.list({
+                block_id: pages.Home,
                 page_size: 50,
             });
-            
+
+            const notionPageContent = await notionClient.blocks.children.list({
+                block_id: type,
+                page_size: 50,
+            });
+
+            const notionPageContentWithChildren = await new Promise((resolve) => {
+                notionPageContent.results.forEach(async (block: any, index: number) => {
+                    if (block.has_children) {
+                        const response = await notionClient.blocks.children.list({
+                            block_id: block.id,
+                            page_size: 50,
+                        });
+
+                        block.children = response.results;
+                    }
+
+                    if (index === (notionPageContent.results.length - 1)) {
+                        resolve(notionPageContent);
+                    }
+                });
+            });
+
             const markdown = await notionScripts.buildMarkdown({ notionPageContent });
             const images = await notionScripts.extractImages({ notionPageContent });
 
-            return c.json({ markdown, images });
+            return c.json({ homepageChildren, markdown, images, notionPageContent: notionPageContentWithChildren });
 
         } catch (error) {
             console.error(error)
@@ -154,5 +173,6 @@ openfitnessRoutes
             return c.json({ message: "something went wrong", error })
         }
     });
+
 
 export { openfitnessRoutes };

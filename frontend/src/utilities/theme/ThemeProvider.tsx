@@ -5,23 +5,24 @@ import { ThemeProvider as MuiThemeProvider } from '@emotion/react';
 import { motion } from "framer-motion"
 
 import { themeConfig } from './themeConfig';
+import { useUtilityStore } from '../store';
 
 
-const useTheme = ({ mode }: { mode: "dark" }) => useMemo(() => createTheme({
+const useTheme = ({ mode }: { mode: "light" | "dark" }) => useMemo(() => createTheme({
   ...themeConfig,
   ...themeConfig[mode],
 }), [mode])
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const theme = useTheme({ mode: 'dark' });
-
+  const { colorMode } = useUtilityStore();
+  const theme = useTheme({ mode: colorMode });
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
         {children}
     </MuiThemeProvider>
   )
-}
+};
 
 export const PageTransitionWrapper = ({ children }: { children: ReactNode }) => {
   return (

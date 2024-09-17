@@ -1,11 +1,10 @@
 import { Box, Button, styled } from '@mui/material';
-// import { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import AuthForm from './AuthForm';
 import { useFitnessStore, useSupabaseStore } from '../../utilities/store';
 import { supabase } from '../../utilities/config/auth.config';
 import { client } from '../pages/Fitness/api';
-// import RegistrationView from '../../pages/Registration/RegistrationView';
 
 
 const Styled = {
@@ -77,6 +76,13 @@ export function AuthProvider({ children }: any) {
         // const { data, error } = await supabase.auth.resetPasswordForEmail(email);
         console.log("handleForgotPassword: ", email);
     };
+
+    useEffect(() => {
+        // ?? Because the auth provider is not a child of the AppRouter, the location ...
+        // ?? ... will not be updated when logging out and redirected to the login page ...
+        // ?? ... causing a bug when trying to log back in and the old path was still there. 
+        if (window.location.pathname !== "/") window.location.replace("/");
+    }, []);
 
     // todo: Work on auto-login with JWT
     // useEffect(() => {

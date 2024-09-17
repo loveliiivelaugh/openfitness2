@@ -30,7 +30,7 @@ const useInitialQuery = () => {
     const fitnessStore = useFitnessStore();
     const supabaseStore = useSupabaseStore();
     const privateDatabase = usePrivateDatabase();
-    console.log("useInitialQuery.privateDatabase: ", { privateDatabase });
+    console.log("useInitialQuery.privateDatabase: ", { privateDatabase, supabaseStore });
     const [data, setData] = useState<any>({});
     const [status, setStatus] = useState<"pending" | "loading" | "success" | "error">("loading");
     const [isLoading, setIsLoading] = useState<boolean>(true);

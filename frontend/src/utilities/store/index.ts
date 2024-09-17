@@ -48,12 +48,33 @@ const useFitnessStore = create<FitnessStoreState>((set) => ({
   setActiveSearchTab: (activeSearchTab) => set(() => ({ activeSearchTab }))
 }));
 
+interface AlertType {
+  severity: "success" | "error" | "warning" | "info";
+  message: string;
+  open: boolean;
+};
+
+interface ConfirmType {
+  open: boolean;
+  title?: string;
+  message?: string;
+  severity?: "success" | "error" | "warning" | "info";
+  continueText?: string;
+  cancelText?: string;
+  onConfirm?: (
+    answer: boolean, 
+    resolve?: (value: boolean | PromiseLike<boolean>) => void) => void | Promise<void>;
+  onCancel?: (answer: boolean) => void;
+};
+
+// *** UTILITY STORE ***
 interface UtilityStoreType {
-  alert: {
-    severity: "success" | "error" | "warning" | "info";
-    message: string;
-    open: boolean;
-  };
+  alert: AlertType
+  confirm: ConfirmType
+  setConfirm: (confirm: UtilityStoreType["confirm"]) => void;
+  clearConfirm: () => void;
+  colorMode: "light" | "dark";
+  setColorMode: (colorMode: UtilityStoreType["colorMode"]) => void;
   setAlert: (alert: UtilityStoreType["alert"]) => void;
   createAlert: (severity: string, message: string) => void;
 }
@@ -64,6 +85,15 @@ const useUtilityStore = create<UtilityStoreType>((set) => ({
     message: "",
     open: false
   },
+  confirm: {
+    open: false,
+    title: "",
+    message: "",
+  },
+  setConfirm: (confirm) => set(() => ({ confirm })),
+  clearConfirm: () => set(() => ({ confirm: { open: false, title: "", message: "" } })),
+  colorMode: "dark",
+  setColorMode: (colorMode) => set(() => ({ colorMode })),
   setAlert: (alert) => set((old) => ({ ...old, alert })),
   createAlert: (severity: string, message: string) => set(() => ({ alert: { severity, message, open: true } }) as UtilityStoreType),
 }));
@@ -105,3 +135,11 @@ const useSupabaseStore = create<SupabaseStore>((set) => ({
 
 
 export { useSupabaseStore, useFitnessStore, useUtilityStore };
+export type { 
+  AlertType, 
+  ConfirmType,
+  UtilityStoreType,
+  FitnessStoreState,
+  SupabaseStore,
+  SupabaseSession
+};

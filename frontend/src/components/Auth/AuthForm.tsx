@@ -11,6 +11,7 @@ const fieldDefinitions = [
         // validators: {
         //     onChange: (value) => (value > 10)
         // }
+        autoFocus: true
     },
     {
         name: "password",

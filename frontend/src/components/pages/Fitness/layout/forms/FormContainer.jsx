@@ -233,19 +233,21 @@ const FormContainer = ({ schema, handleRefreshQueries, ...props }) => {
         delete values.value.id;
 
         // Get full nix details if food
+        console.log("onSubmit: ", values);
         const additionalDetails = (schema.table === "food")
             ? (await client.get("/openfitness/get-single-food?id=" + values.value.nutrients.nix_item_id)).data
             : {};
-        // console.log("additionalDetails: ", additionalDetails);
+        console.log("additionalDetails: ", additionalDetails);
 
         let payload = {
             table: schema.table,
             data: {
                 ...values.value,
-                ...(schema.table === "food") && {
+                ...(schema.table === "food" && additionalDetails?.foods) && {
                     nutrients: {
+                        nix_item_id: values.value.nutrients.nix_item_id,
                         ...values.value.nutrients,
-                        ...additionalDetails?.foods[0]
+                        ...additionalDetails.foods[0]
                     }
                 },
                 user_id: supabaseStore?.session?.user?.id
@@ -258,7 +260,7 @@ const FormContainer = ({ schema, handleRefreshQueries, ...props }) => {
         // if (schema.table === "profile") await updateDbQuery.mutate(payload);
         // else await mutateDbQuery.mutate(payload);
         
-        const [currentProfile] = fitnessStore.fitnessTables?.profile;
+        const [currentProfile] = fitnessStore.fitnessTables?.profile || [];
         // Ideally Profile would be created when user registers -- then user can only update profile record
         // Direct client-side insert or update -- to use user_id without big security overhead
         const response = (

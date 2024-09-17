@@ -6,7 +6,7 @@ import {
     InputAdornment, IconButton,
     Box, Drawer, Grid, List, ListItemText, 
     Stack, TextField, Typography,
-    Chip, Tabs, Tab
+    Chip, Tabs, Tab,
 } from '@mui/material'
 import { BottomNavigation, BottomNavigationAction } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
@@ -14,19 +14,19 @@ import CloseIcon from '@mui/icons-material/Close';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 
 // Components
-import ChartsContainer from './layout/charts/ChartsContainer';
+import NewProfileSection from './layout/NewProfileSection';
+import ChartsContainer from './layout/charts/ChartsWrapper';
 import FormContainer from './layout/forms/FormContainer';
 import ListContent from './layout/ListContent';
 import Alerts from './layout/Alert';
-import { Navbar } from './layout/Navbar';
-
-import NewProfileSection from './layout/NewProfileSection';
 
 // Services
 import { useFitnessStore, useUtilityStore  } from '../../../utilities/store';
 import useInitialQuery from './api/useInitialQuery';
 import { fitnessQueries, paths, queries } from './api';
 import RegistrationView from '../Registration/RegistrationView';
+import { PageTransitionWrapper } from '../../../utilities/theme/ThemeProvider';
+import Loader from '../../Loader/Loader';
 
 
 const queryPaths = [
@@ -93,38 +93,22 @@ const Fitness = () => {
 
 
     return ({
-        "pending": <div>Loading...</div>,
-        "loading": <div>Tables are getting ready...</div>,
+        "pending": <Loader />,
+        "loading": <Loader />,
+        "error": <Loader error />,
         "success": (!initialQuery.data?.profile?.length || fitnessStore.registrationView) 
-            ? <RegistrationView handleRefreshQueries={handleRefreshQueries} /> 
-            : (
+            ? (
+                <PageTransitionWrapper>
+                    <RegistrationView handleRefreshQueries={handleRefreshQueries} /> 
+                </PageTransitionWrapper>
+            ) : (
+                <PageTransitionWrapper>
                 <Grid container my={14} p={4} sx={{ maxWidth: "100vw" }}>
-
-                    <Navbar />
-
-                    <Grid item sm={12} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-                        {/* <Typography variant="h4">Fitness Dashboard</Typography> */}
-                        {/* <DateTimeLabel /> */}
-                    </Grid>
-
+                    
                     <NewProfileSection
                         data={initialQuery.data?.profile?.[0]}
                         filterList={(key: string)=> !["id", "user_id", "created_at"].includes(key)}
                     />
-                    
-                    {null ? (
-                        <Grid item sm={12}>
-                            {initialQuery.data?.charts?.profile
-                                ? (
-                                    <ChartsContainer 
-                                        charts={initialQuery.data.charts.profile} 
-                                        disableChartButtons 
-                                        disableFilterButtons 
-                                    />
-                                ) : <Alerts message="Missing profile data" />
-                            }
-                        </Grid>
-                    ) : (<></>)}
 
                     {/* Macro KPI's */}
                     <Grid item xs={12} sm={4}>
@@ -173,9 +157,6 @@ const Fitness = () => {
                                 <ChartsContainer charts={initialQuery?.data?.charts?.weight} defaultChart='bar'/>
                             ) : <Alerts message="Missing weight data" />
                         }
-                    </Grid>
-                    <Grid item sm={12} md={12} lg={12}>
-                        {/* <MyCalendar /> */}
                     </Grid>
 
                     <Drawer 
@@ -349,8 +330,8 @@ const Fitness = () => {
                     </Box>
 
                 </Grid>
-            ),
-            "error": <div>Error</div>
+                </PageTransitionWrapper>
+            )
         }[initialQuery.status]);
 }
 

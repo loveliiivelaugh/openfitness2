@@ -16,7 +16,7 @@ const NewProfileSection = ({ data, filterList }: { data?: any, filterList?: (key
         <Grid container>
             <Grid item sm={6}>
                 <Grid container>
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={10} sm={8}>
                         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", mt: "30%" }}>
                             <Avatar sx={{ width: 200, height: 200 }} />
                         </Box>
@@ -26,7 +26,7 @@ const NewProfileSection = ({ data, filterList }: { data?: any, filterList?: (key
                             </Button>
                         </CardActionArea>
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={2} sm={4}>
                         <List dense>
                             {data &&
                                 Object

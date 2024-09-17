@@ -1,58 +1,32 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 import {
     Alert,
-    AppBar, Avatar, Box, IconButton, Menu,
-    MenuItem, Toolbar, Tooltip, Typography
+    AppBar, Avatar, Box, IconButton, 
+    Toolbar, Tooltip, Typography
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 
-import { useSupabaseStore } from '../../../../utilities/store';
-import { supabase } from '../../../../utilities/config/auth.config';
-import { useNavigate } from 'react-router-dom';
+import { useSupabaseStore, useUtilityStore } from '../../../../utilities/store';
+import NavSettingsMenu from './NavSettingsMenu';
 
 
-const settings = [
-    'Account',
-    'Dashboard',
-    'Changelog',
-    'Roadmap',
-    'Documentation',
-    'Feature Request',
-    'Bug Report',
-    // 'Privacy Policy',
-    // 'Terms of Service',
-    // 'Data Policy',
-    'Logout'
-];
 
 export const Navbar = () => {
     const navigate = useNavigate();
     const supabaseStore = useSupabaseStore();
+    const utilityStore = useUtilityStore();
     const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
     const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElUser(event.currentTarget);
     };
 
-    const handleCloseUserMenu = async (setting: string) => {
-
-        if ((typeof setting !== "string") || !setting) {setAnchorElUser(null); return;}
-        
-        let toLocation = setting;
-        
-        if (["Feature Request", "Bug Report"].includes(setting)) 
-            toLocation = ("reporting/" + setting.split(" ")[0].toLowerCase())
-        else if (["Documentation", "Changelog", "Roadmap"].includes(setting))
-            toLocation = ("docs/" + setting.toLowerCase())
-        else toLocation = setting.toLowerCase();
-
-        navigate("/" + toLocation);
-
-        if (setting === 'Logout') {
-            await supabase.auth.signOut();
-            supabaseStore.setSession(null);
-            supabaseStore.setUserType(null);
-        }
+    const handleCloseUserMenu = async (setting: any) => {
+        if (setting?.onClick) setting.onClick({ supabaseStore, navigate });
+        else navigate(setting.toLocation);
 
         setAnchorElUser(null);
     };
@@ -60,52 +34,35 @@ export const Navbar = () => {
     return (
         <AppBar>
             <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+                
                 <IconButton color="inherit" onClick={() => navigate("/")}>
                     <HomeIcon />
                 </IconButton>
+                
                 <Typography variant="h6">OpenFitness</Typography> 
-                {/* <Avatar src={"M"} sx={{ width: 40, height: 40 }} /> */}
-                <Box sx={{ flexGrow: 0 }}>
+                
+                <Box sx={{ display: "flex", flexGrow: 0, gap: 1 }}>
+
+                    {/* Settings Dropdown Menu */}
                     <Tooltip title="Open settings">
                         <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                             <Avatar alt="M" src="M" />
                         </IconButton>
                     </Tooltip>
-                    <Menu
-                        sx={{ mt: '45px' }}
-                        id="menu-appbar"
-                        anchorEl={anchorElUser}
-                        anchorOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                        }}
-                        keepMounted
-                        transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                        }}
-                        open={Boolean(anchorElUser)}
-                        onClose={handleCloseUserMenu}
-                    >
-                    {settings.map((setting: string, index: number) => (
-                        <MenuItem 
-                            key={setting} 
-                            onClick={() => handleCloseUserMenu(setting)} 
-                            sx={{
-                                ...[1, 4, 6].includes(index) 
-                                && { borderBottom: "solid 1px rgba(33,33,33, 1)" }
-                            }}
-                        >
-                            {/* <ListItemIcon sx={{ px: 1 }}>
-                                <Avatar alt="M" />
-                            </ListItemIcon> */}
-                            <Typography>
-                                {setting}
-                            </Typography>
-                        </MenuItem>
-                    ))}
-                    </Menu>
+                    <NavSettingsMenu 
+                        anchorElUser={anchorElUser} 
+                        handleCloseUserMenu={handleCloseUserMenu} 
+                    />
+
+                    {/* Light/Dark Mode */}
+                    <Tooltip title={true ? "Light Mode" : "Dark Mode"}>
+                        <IconButton color="inherit" onClick={() => utilityStore.setColorMode(utilityStore.colorMode === "light" ? "dark" : "light")}>
+                            {utilityStore.colorMode === "light" ? <LightModeIcon /> : <DarkModeIcon />}
+                        </IconButton>
+                    </Tooltip>
+
                 </Box>
+                
             </Toolbar>
             <Alert severity='warning'>
                 <Typography variant="h6">

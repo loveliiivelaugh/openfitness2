@@ -43,14 +43,16 @@ export const openfitnessScripts = {
 
     // Description: group data by date
     groupDataByDate: (data: Array<any>, dateKey: string) => data
-        .reduce((acc, curr) => {
-            const date = curr[dateKey];
-            if (!acc[date]) {
-                acc[date] = [];
-            }
-            acc[date].push(curr);
-            return acc;
-        }, {}),
+        ? data
+            .reduce((acc, curr) => {
+                const date = curr[dateKey];
+                if (!acc[date]) {
+                    acc[date] = [];
+                }
+                acc[date].push(curr);
+                return acc;
+            }, {})
+        : {},
 
     extractMacrosFromFoodData: (groupedFoodData: Array<any>, foodDataDates: Array<any>) => {
         foodDataDates.map(date => {

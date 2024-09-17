@@ -2,6 +2,7 @@
 import { Hono } from 'hono';
 import { Context } from 'hono';
 import { validator } from 'hono/validator';
+import { Parser } from '@json2csv/plainjs';
 
 import { schema } from '../../database';
 // import { validationMap } from '../../database/schemas';
@@ -182,6 +183,48 @@ databaseRoutes
             
             return c.json(error, 500);
         }
-    });
+    })
+/**
+ * @swagger
+ * /database/write_db:
+ *   get:
+ *     summary: Add stuff
+ *     responses:
+ */
+    .get(
+        '/export/data',
+        // Route definition
+        async (c: Context) => {
+            const { database } = c.var;
+
+            try {
+                const data = await Promise.all(
+                    [
+                        "profile",
+                        "food",
+                        "exercise",
+                        "weight",
+                        "sleep",
+                        "steps"
+                    ].map(async (table: string) => await database
+                        .query
+                        ?.[table]
+                        .findMany({})
+                    )
+                );
+
+                console.log("data: ", data);
+                const parser = new Parser();
+                const csv = data.map((table: any) => parser.parse(table));
+
+                console.log("csv: ", csv);
+                return c.json({ data, csv });
+                
+            } catch (error: any) {
+                console.error(error, "Error while writing to table: ");
+                
+                return c.json(error);
+            }
+        });
 
 export { databaseRoutes };
