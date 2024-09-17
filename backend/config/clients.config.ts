@@ -22,7 +22,10 @@ const trustedSources: string[] = [
     'http://localhost:3001',
     'http://localhost:3002',
     'http://localhost:3003',
-    "http://localhost:5052"
+    "http://localhost:5052",
+    "http://localhost:8080",
+    "http://localhost:8081",
+    "http://localhost:8082",
 ];
 
 const allowedHeaders: string[] = [
